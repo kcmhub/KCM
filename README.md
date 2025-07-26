@@ -82,6 +82,8 @@ KCM includes a built-in licensing mechanism. You can:
 
 Need help generating a license? Contact [contact@elite-group.fr](mailto:contact@elite-group.fr)
 
+*🛡️ **License**: Proprietary. Free for evaluation only.  
+📬 Commercial use requires a license: [contact@elite-group.fr](mailto:contact@elite-group.fr)
 ---
 
 ## 📬 Get in Touch
