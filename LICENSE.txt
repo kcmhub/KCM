@@ -1,0 +1,33 @@
+Proprietary Evaluation License
+
+Copyright (c) 2024-2025 ELITE-TECH
+
+This software, Kafka Cluster Manager (KCM), is proprietary and confidential. All rights reserved.
+
+Permission is hereby granted to any individual or organization to use this software **free of charge for non-commercial evaluation purposes only**, subject to the following conditions:
+
+1. **Non-Commercial Use Only**
+   This license grants usage rights solely for testing, evaluation, and demonstration. **Commercial use is strictly prohibited** without a valid license agreement from ELITE-TECH.
+
+2. **No Redistribution**
+   You may not distribute, sublicense, or make the software publicly available in any form.
+
+3. **No Modification or Reverse Engineering**
+   You may not modify, reverse engineer, decompile, or create derivative works from this software.
+
+4. **Intellectual Property**
+   This software remains the exclusive property of ELITE-TECH. All trademarks, logos, and code are protected under applicable laws.
+
+5. **Disclaimer of Warranty**
+   This software is provided "as is", without warranty of any kind. Use at your own risk.
+
+6. **License Termination**
+   ELITE-TECH reserves the right to terminate this license at any time if the terms are violated.
+
+---
+
+To request a commercial license or extended evaluation, please contact:
+
+📧 contact@elite-group.fr
+🌍 https://kafkaetech.com
+

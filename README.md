@@ -1,100 +1,91 @@
-# Kafka Cluster Manager (KCM)
+# Kafka Cluster Manager (KCM) 🧠📊
 
-**Kafka Cluster Manager (KCM)** is a full-featured self-hosted solution to manage and monitor Apache Kafka environments through a secure, modern, and intuitive web interface.
+Kafka Cluster Manager (KCM) is a lightweight DevOps-oriented platform to **monitor, manage and interact with Apache Kafka clusters** via a modern UI and powerful REST API.
 
-> 🔧 Built for developers, DevOps, and SREs looking to simplify Kafka operations.
-
----
-
-## ✨ Features
-
-* 🔍 Explore topics, consumer groups, and lag in real time
-* ⚙️ Manage Kafka Connect connectors
-* 🧠 Organize access with role-based permissions
-* 🔐 Built-in license system and encryption support
-* 📊 Track metrics with Redis & PostgreSQL backends
-* 🌐 Modern Angular frontend, fully responsive
+Built with **Spring Boot 3**, **Angular**, **PostgreSQL**, and **Redis**, KCM helps teams gain insights, visibility, and control over Kafka environments.
 
 ---
 
-## 🚀 Quickstart (Docker)
-
-> Requires: Docker + Docker Compose
-
-### 1. Clone the repository
+## 🚀 Quickstart with Docker Compose
 
 ```bash
-git clone https://github.com/kafkaetech/kcm-docker.git
-cd kcm-docker
+git clone https://github.com/etech-data/KCM.git
+cd KCM
+docker compose up -d
 ```
 
-### 2. Prepare required runtime files
+Access:
 
-Make sure the following files and folders exist:
-
-```
-.
-├── runtime-config.json
-├── nginx.conf
-└── data/
-    ├── keys/
-    │   ├── private.pem
-    │   └── public.pem
-    └── files/
-```
-
-### 3. Start the stack
-
-```bash
-docker-compose up -d
-```
-
-### 4. Access the UI
-
-* 🌐 [http://localhost](http://localhost)
-* 🔐 Default login: `admin` / `admin` (can be overridden via env variables)
+* 🖥️ UI: [http://localhost](http://localhost)
 
 ---
 
-## 📆 Docker Images
+## ⚙️ Configuration via Environment Variables
 
-* **Backend API**
-  [`kafkaetech/kcm-api`](https://hub.docker.com/r/kafkaetech/kcm-api)
+You can override defaults using a `.env` file or directly in your environment.
 
-* **Frontend UI**
-  [`kafkaetech/kcm-ui`](https://hub.docker.com/r/kafkaetech/kcm-ui)
-
----
-
-## 🥉 Requirements
-
-* Running Kafka cluster (self-managed or cloud)
-* Optional: Kafka Connect, Schema Registry
-
----
-
-## 📄 Licensing
-
-KCM includes a built-in licensing mechanism. You can:
-
-* Provide a static license file (`license.json` + `license.sig`)
-* Or enable license syncing via Kafka topic (`__kcm_license`)
-
-Need help generating a license? Contact [contact@elite-group.fr](mailto:contact@elite-group.fr)
-
----
-
-## 📬 Get in Touch
-
-* 🌍 Website: [https://kafkaetech.com](https://kafkaetech.com)
-* 💙 GitHub: [https://github.com/kafkaetech](https://github.com/kafkaetech)
-* 📧 Email: [contact@elite-group.fr](mailto:contact@elite-group.fr)
+| Variable                     | Default                            | Description                                 |
+| ---------------------------- | ---------------------------------- | ------------------------------------------- |
+| `KCM_APP_NAME`               | `kcm-manager`                      | Application name                            |
+| `KCM_APP_VERSION`            | `1.0.0`                            | Application version                         |
+| `KCM_DEFAULT_USER_ENABLED`   | `true`                             | Enable default user                         |
+| `KCM_DEFAULT_PASSWORD`       | `admin`                            | Default user password                       |
+| `KCM_LICENSE_PATH`           | `/license/license.json`            | Path to license JSON                        |
+| `KCM_LICENSE_KAFKA_TOPIC`    | `__kcm_license`                    | Kafka topic used to distribute license info |
+| `KCM_LICENSE_SIGNATURE_PATH` | `/license/license.sig`             | Path to license signature                   |
+| `KCM_LICENSE_HISTORY_DIR`    | `/license/license-history`         | Directory to store license usage history    |
+| `KCM_ENCRYPT_PRIVATE_KEY`    | `/app/keys/private.pem`            | Private key path for encryption             |
+| `KCM_ENCRYPT_PUBLIC_KEY`     | `/app/keys/public.pem`             | Public key path for encryption              |
+| `KCM_JWT_PERSISTENCE_MODE`   | `JDBC`                             | JWT persistence method                      |
+| `KCM_JWT_TOKEN_VALIDITY`     | `86400`                            | JWT token validity in seconds               |
+| `KCM_JWT_PRIVATE_KEY`        | `/app/keys/private.pem`            | JWT private key path                        |
+| `KCM_JWT_PUBLIC_KEY`         | `/app/keys/public.pem`             | JWT public key path                         |
+| `KCM_APP_FILES_PATH`         | `/data`                            | Default file storage path                   |
+| `KCM_DB_URL`                 | `jdbc:postgresql://db:5432/kcm_db` | PostgreSQL JDBC URL                         |
+| `KCM_DB_USER`                | `kcm_user`                         | PostgreSQL user                             |
+| `KCM_DB_PWD`                 | `kcm_password`                     | PostgreSQL password                         |
+| `KCM_ADMIN_CLIENT_ID`        | `kc-admin-client`                  | Kafka admin client ID                       |
+| `KCM_REDIS_HOST`             | `redis`                            | Redis hostname                              |
+| `KCM_REDIS_PORT`             | `6379`                             | Redis port                                  |
 
 ---
 
-🛡️ **License**: Proprietary. Free for evaluation only.  
-📬 Commercial use requires a license: [contact@elite-group.fr](mailto:contact@elite-group.fr)
+## 📦 Docker Images
+
+| Service  | Image                                                               |
+| -------- | ------------------------------------------------------------------- |
+| Backend  | [`kafkaetech/kcm-api`](https://hub.docker.com/r/kafkaetech/kcm-api) |
+| Frontend | [`kafkaetech/kcm-ui`](https://hub.docker.com/r/kafkaetech/kcm-ui)   |
 
 ---
 
-> 🚀 Made with ❤️ by the ELITE-TECH team
+## 🔐 License
+
+This project is **not open source**. It is licensed under a **Proprietary Evaluation License**.
+
+* 🛠️ Use is free for non-commercial evaluation
+* 🚫 Commercial use requires a license
+* 📬 Contact us: [contact@elite-group.fr](mailto:contact@elite-group.fr) to request your free evaluation license
+
+See [`LICENSE.txt`](./LICENSE.txt) for full terms.
+
+---
+
+## 📬 Links
+
+* 🔗 [UI Docker Image](https://hub.docker.com/r/kafkaetech/kcm-ui)
+* 🔗 [API Docker Image](https://hub.docker.com/r/kafkaetech/kcm-api)
+* 🌍 [Official Website](https://kafkaetech.com)
+* 📁 [Source Repository](https://github.com/etech-data/KCM)
+
+---
+
+## 🤝 Contributing / Feedback
+
+You can open issues or feedback directly on our GitHub repo. We also welcome feature suggestions, bug reports, and license requests.
+
+📮 For private requests or free license keys, please contact [contact@elite-group.fr](mailto:contact@elite-group.fr).
+
+---
+
+**© 2024-2025 ELITE-TECH. All rights reserved.**
