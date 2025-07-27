@@ -10,7 +10,7 @@ Built with **Spring Boot 3**, **Angular**, **PostgreSQL**, and **Redis**, KCM he
 
 ```bash
 git clone https://github.com/etech-data/KCM.git
-cd KCM
+cd KCM/kcm_with_docker_compose
 docker compose up -d
 ```
 
