@@ -11,6 +11,7 @@ Built with **Spring Boot 3**, **Angular**, **PostgreSQL**, and **Redis**, KCM he
 ```bash
 git clone https://github.com/etech-data/KCM.git
 cd KCM/kcm_with_docker_compose
+docker network create kcm-net
 docker compose up -d
 ```
 
@@ -27,7 +28,6 @@ You can override defaults using a `.env` file or directly in your environment.
 | Variable                     | Default                            | Description                                 |
 | ---------------------------- | ---------------------------------- | ------------------------------------------- |
 | `KCM_APP_NAME`               | `kcm-manager`                      | Application name                            |
-| `KCM_APP_VERSION`            | `1.0.0`                            | Application version                         |
 | `KCM_DEFAULT_USER_ENABLED`   | `true`                             | Enable default user                         |
 | `KCM_DEFAULT_PASSWORD`       | `admin`                            | Default user password                       |
 | `KCM_LICENSE_PATH`           | `/license/license.json`            | Path to license JSON                        |
@@ -75,8 +75,8 @@ See [`LICENSE.txt`](./LICENSE.txt) for full terms.
 
 * 🔗 [UI Docker Image](https://hub.docker.com/r/kafkaetech/kcm-ui)
 * 🔗 [API Docker Image](https://hub.docker.com/r/kafkaetech/kcm-api)
-* 🌍 [Official Website](https://kafkaetech.com)
-* 📁 [Source Repository](https://github.com/etech-data/KCM)
+* 🌍 [Official Website](https://www.kcmhub.io)
+* 📁 [Repository](https://github.com/etech-data/KCM)
 
 ---
 

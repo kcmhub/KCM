@@ -1,5 +1,12 @@
 version: "3.9"
 
+# Ensure the network is created before running this compose file
+# docker network create kcm-net
+networks:
+  default:
+    external:
+      name: kcm-net
+
 services:
   postgres:
     image: postgres:16
@@ -18,6 +25,20 @@ services:
     container_name: kcm-redis
     ports:
       - "6379:6379"
+    volumes:
+      - redisdata:/data
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: redis-commander
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - redis
 
   kcm-api:
     image: kafkaetech/kcm-api:latest
@@ -64,14 +85,16 @@ services:
       KCM_ADMIN_CLIENT_ID: "kc-admin-client"
 
       # Redis
-      SPRING_REDIS_HOST: "redis"
-      SPRING_REDIS_PORT: "6379"
-      SPRING_REDIS_DATABASE: "0"
-      SPRING_REDIS_TIMEOUT: "2000"
+      KCM_REDIS_HOST: "redis"
+      KCM_REDIS_PORT: "6379"
+      KCM_REDIS_DB: "0"
+      KCM_REDIS_TIMEOUT: "2000"
 
     volumes:
       - ./data/keys:/app/keys
       - ./data/files:/app/files
+      - kcm-app:/app
+      - kcm-evaluation:/tmp/evaluation
 
   kcm-ui:
     image: kafkaetech/kcm-ui:latest
@@ -86,6 +109,9 @@ services:
 
 volumes:
   pgdata:
+  redisdata:
   kcm-license:
   kcm-keys:
   kcm-files:
+  kcm-app:
+  kcm-evaluation:
