@@ -29,7 +29,7 @@ services:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-atoumi@elite-group.fr}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
       PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION: "True"
-      PGADMIN_CONFIG_LOGIN_BANNER: "Authorized users only."
+      PGADMIN_CONFIG_LOGIN_BANNER: "'Authorized users only.'"
     volumes:
       - pgadmin_data:/var/lib/pgadmin
     ports:
