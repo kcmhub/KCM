@@ -126,6 +126,7 @@ services:
 
 volumes:
   pgdata:
+  pgadmin_data:
   redisdata:
   kcm-license:
   kcm-keys:
