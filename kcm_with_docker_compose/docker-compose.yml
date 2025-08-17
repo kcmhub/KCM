@@ -20,6 +20,23 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
+  pgadmin:
+    image: dpage/pgadmin4:8
+    container_name: pgadmin
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-atoumi@elite-group.fr}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION: "True"
+      PGADMIN_CONFIG_LOGIN_BANNER: "Authorized users only."
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    ports:
+      - "5050:80"             # pgAdmin accessible sur http://localhost:5050
+    # Sécurité: retire l'exposition de port si tu mets ça en prod derrière un proxy.
+
   redis:
     image: redis:6.2
     container_name: kcm-redis
