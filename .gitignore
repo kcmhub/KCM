@@ -1,1 +1,8 @@
 /.idea/
+/kafka_brokers_docker_compose/certificates/broker-*/broker-*.crt
+/kafka_brokers_docker_compose/certificates/broker-*/broker-*.csr
+/kafka_brokers_docker_compose/certificates/broker-*/broker-*.key
+/kafka_brokers_docker_compose/certificates/broker-*/broker-*.p12
+/kafka_brokers_docker_compose/certificates/broker-*/kafka.keystore.jks
+/kafka_brokers_docker_compose/certificates/broker-*/kafka.truststore.jks
+/kcm_with_docker_compose/data/files/KAFKA_CLUSTER/
