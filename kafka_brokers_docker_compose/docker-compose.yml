@@ -1,28 +1,27 @@
 version: '3.9'
 
-# Ensure the network is created before running this compose file
 # docker network create kcm-net
 networks:
   default:
     external:
       name: kcm-net
 
-
 services:
 
+  # -------------------------
+  # Controllers (KRaft)
+  # -------------------------
   controller-1:
     image: apache/kafka:latest
     container_name: controller-1
-    ports:
-      - 19093:9093
+    ports: ["19093:9093"]
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: controller
       KAFKA_LISTENERS: CONTROLLER://:9093
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@controller-1:9093,2@controller-2:9093,3@controller-3:9093
-      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_LOG_DIRS: "/var/lib/kafka/data"
     volumes:
       - controller1-data:/var/lib/kafka/data
@@ -30,16 +29,14 @@ services:
   controller-2:
     image: apache/kafka:latest
     container_name: controller-2
-    ports:
-      - 29093:9093
+    ports: ["29093:9093"]
     environment:
       KAFKA_NODE_ID: 2
       KAFKA_PROCESS_ROLES: controller
       KAFKA_LISTENERS: CONTROLLER://:9093
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@controller-1:9093,2@controller-2:9093,3@controller-3:9093
-      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_LOG_DIRS: "/var/lib/kafka/data"
     volumes:
       - controller2-data:/var/lib/kafka/data
@@ -47,152 +44,130 @@ services:
   controller-3:
     image: apache/kafka:latest
     container_name: controller-3
-    ports:
-      - 39093:9093
+    ports: ["39093:9093"]
     environment:
       KAFKA_NODE_ID: 3
       KAFKA_PROCESS_ROLES: controller
       KAFKA_LISTENERS: CONTROLLER://:9093
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@controller-1:9093,2@controller-2:9093,3@controller-3:9093
-      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_LOG_DIRS: "/var/lib/kafka/data"
     volumes:
       - controller3-data:/var/lib/kafka/data
 
+  # -------------------------
+  # Brokers (TLS + SASL/SCRAM)
+  # -------------------------
   broker-1:
     image: apache/kafka:latest
     container_name: broker-1
     ports:
-      - "9492:9492"  # PLAINTEXT_HOST
-      - "9493:9493"  # SASL_SSL_HOST
+      - "9493:9493"    # SASL_SSL_HOST (client access)
     environment:
       KAFKA_NODE_ID: 4
-      KAFKA_LOG_DIRS: "/var/lib/kafka/data"
       KAFKA_PROCESS_ROLES: broker
+      KAFKA_LOG_DIRS: "/var/lib/kafka/data"
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@controller-1:9093,2@controller-2:9093,3@controller-3:9093
-      KAFKA_LISTENERS: PLAINTEXT_INTERNAL://:9092,PLAINTEXT_HOST://:9492,SASL_SSL_INTERNAL://:9093,SASL_SSL_HOST://:9493
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT_INTERNAL://broker-1:9092,PLAINTEXT_HOST://localhost:9492,SASL_SSL_INTERNAL://broker-1:9093,SASL_SSL_HOST://localhost:9493
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,SASL_SSL_INTERNAL:SASL_SSL,SASL_SSL_HOST:SASL_SSL
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_INTERNAL
+
+      # Listeners: ONLY SASL_SSL (no PLAINTEXT)
+      KAFKA_LISTENERS: SASL_SSL_INTERNAL://:9092,SASL_SSL_HOST://:9493
+      KAFKA_ADVERTISED_LISTENERS: SASL_SSL_INTERNAL://broker-1:9092,SASL_SSL_HOST://localhost:9493
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,SASL_SSL_INTERNAL:SASL_SSL,SASL_SSL_HOST:SASL_SSL
+      KAFKA_INTER_BROKER_LISTENER_NAME: SASL_SSL_INTERNAL
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+
+      # SASL/SCRAM
+      KAFKA_SASL_ENABLED_MECHANISMS: SCRAM-SHA-512,PLAIN
       KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: SCRAM-SHA-512
-      KAFKA_SASL_ENABLED_MECHANISMS: SCRAM-SHA-512
+
+      # TLS
       KAFKA_SSL_KEYSTORE_LOCATION: /var/private/ssl/kafka.keystore.jks
       KAFKA_SSL_KEYSTORE_PASSWORD: changeit
       KAFKA_SSL_TRUSTSTORE_LOCATION: /var/private/ssl/kafka.truststore.jks
       KAFKA_SSL_TRUSTSTORE_PASSWORD: changeit
+
+      # JAAS (inter-broker)
       KAFKA_OPTS: "-Djava.security.auth.login.config=/etc/kafka/jaas.conf"
+
+      # ACLs (authorizer actif mais permissif pour démarrer)
       KAFKA_AUTHORIZER_CLASS_NAME: org.apache.kafka.metadata.authorizer.StandardAuthorizer
       KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: "true"
     volumes:
       - broker1-data:/var/lib/kafka/data
       - ./certificates/broker-1:/var/private/ssl
       - ./jaas.conf:/etc/kafka/jaas.conf
-    depends_on:
-      - controller-1
-      - controller-2
-      - controller-3
+    depends_on: [controller-1, controller-2, controller-3]
 
   broker-2:
     image: apache/kafka:latest
     container_name: broker-2
     ports:
-      - "9592:9592"  # PLAINTEXT_HOST
-      - "9593:9593"  # SASL_SSL_HOST
+      - "9593:9593"
     environment:
       KAFKA_NODE_ID: 5
-      KAFKA_LOG_DIRS: "/var/lib/kafka/data"
       KAFKA_PROCESS_ROLES: broker
+      KAFKA_LOG_DIRS: "/var/lib/kafka/data"
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@controller-1:9093,2@controller-2:9093,3@controller-3:9093
-      KAFKA_LISTENERS: PLAINTEXT_INTERNAL://:9092,PLAINTEXT_HOST://:9592,SASL_SSL_INTERNAL://:9093,SASL_SSL_HOST://:9593
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT_INTERNAL://broker-2:9092,PLAINTEXT_HOST://localhost:9592,SASL_SSL_INTERNAL://broker-2:9093,SASL_SSL_HOST://localhost:9593
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,SASL_SSL_INTERNAL:SASL_SSL,SASL_SSL_HOST:SASL_SSL
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_INTERNAL
+
+      KAFKA_LISTENERS: SASL_SSL_INTERNAL://:9092,SASL_SSL_HOST://:9593
+      KAFKA_ADVERTISED_LISTENERS: SASL_SSL_INTERNAL://broker-2:9092,SASL_SSL_HOST://localhost:9593
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,SASL_SSL_INTERNAL:SASL_SSL,SASL_SSL_HOST:SASL_SSL
+      KAFKA_INTER_BROKER_LISTENER_NAME: SASL_SSL_INTERNAL
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+
+      KAFKA_SASL_ENABLED_MECHANISMS: SCRAM-SHA-512,PLAIN
       KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: SCRAM-SHA-512
-      KAFKA_SASL_ENABLED_MECHANISMS: SCRAM-SHA-512
+
       KAFKA_SSL_KEYSTORE_LOCATION: /var/private/ssl/kafka.keystore.jks
       KAFKA_SSL_KEYSTORE_PASSWORD: changeit
       KAFKA_SSL_TRUSTSTORE_LOCATION: /var/private/ssl/kafka.truststore.jks
       KAFKA_SSL_TRUSTSTORE_PASSWORD: changeit
+
       KAFKA_OPTS: "-Djava.security.auth.login.config=/etc/kafka/jaas.conf"
+
       KAFKA_AUTHORIZER_CLASS_NAME: org.apache.kafka.metadata.authorizer.StandardAuthorizer
       KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: "true"
     volumes:
       - broker2-data:/var/lib/kafka/data
       - ./certificates/broker-2:/var/private/ssl
       - ./jaas.conf:/etc/kafka/jaas.conf
-    depends_on:
-      - controller-1
-      - controller-2
-      - controller-3
+    depends_on: [controller-1, controller-2, controller-3]
 
   broker-3:
     image: apache/kafka:latest
     container_name: broker-3
     ports:
-      - "9692:9692"  # PLAINTEXT_HOST
-      - "9693:9693"  # SASL_SSL_HOST
+      - "9693:9693"
     environment:
       KAFKA_NODE_ID: 6
-      KAFKA_LOG_DIRS: "/var/lib/kafka/data"
       KAFKA_PROCESS_ROLES: broker
+      KAFKA_LOG_DIRS: "/var/lib/kafka/data"
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@controller-1:9093,2@controller-2:9093,3@controller-3:9093
-      KAFKA_LISTENERS: PLAINTEXT_INTERNAL://:9092,PLAINTEXT_HOST://:9692,SASL_SSL_INTERNAL://:9093,SASL_SSL_HOST://:9693
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT_INTERNAL://broker-3:9092,PLAINTEXT_HOST://localhost:9692,SASL_SSL_INTERNAL://broker-3:9093,SASL_SSL_HOST://localhost:9693
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,SASL_SSL_INTERNAL:SASL_SSL,SASL_SSL_HOST:SASL_SSL
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_INTERNAL
+
+      KAFKA_LISTENERS: SASL_SSL_INTERNAL://:9092,SASL_SSL_HOST://:9693
+      KAFKA_ADVERTISED_LISTENERS: SASL_SSL_INTERNAL://broker-3:9092,SASL_SSL_HOST://localhost:9693
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,SASL_SSL_INTERNAL:SASL_SSL,SASL_SSL_HOST:SASL_SSL
+      KAFKA_INTER_BROKER_LISTENER_NAME: SASL_SSL_INTERNAL
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+
+      KAFKA_SASL_ENABLED_MECHANISMS: SCRAM-SHA-512,PLAIN
       KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: SCRAM-SHA-512
-      KAFKA_SASL_ENABLED_MECHANISMS: SCRAM-SHA-512
+
       KAFKA_SSL_KEYSTORE_LOCATION: /var/private/ssl/kafka.keystore.jks
       KAFKA_SSL_KEYSTORE_PASSWORD: changeit
       KAFKA_SSL_TRUSTSTORE_LOCATION: /var/private/ssl/kafka.truststore.jks
       KAFKA_SSL_TRUSTSTORE_PASSWORD: changeit
+
       KAFKA_OPTS: "-Djava.security.auth.login.config=/etc/kafka/jaas.conf"
+
       KAFKA_AUTHORIZER_CLASS_NAME: org.apache.kafka.metadata.authorizer.StandardAuthorizer
       KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: "true"
     volumes:
       - broker3-data:/var/lib/kafka/data
       - ./certificates/broker-3:/var/private/ssl
       - ./jaas.conf:/etc/kafka/jaas.conf
-    depends_on:
-      - controller-1
-      - controller-2
-      - controller-3
-
-  kafka-connect:
-    image: confluentinc/cp-kafka-connect:7.0.1
-    container_name: kafka-connect
-    ports:
-      - 8083:8083
-    environment:
-      CONNECT_BOOTSTRAP_SERVERS: broker-1:9092,broker-2:9092,broker-3:9092
-      CONNECT_REST_PORT: 8083
-      CONNECT_GROUP_ID: kafka-connect-group
-      CONNECT_CONFIG_STORAGE_TOPIC: kc-connect-configs
-      CONNECT_OFFSET_STORAGE_TOPIC: kc-connect-offsets
-      CONNECT_STATUS_STORAGE_TOPIC: kc-connect-status
-      CONNECT_KEY_CONVERTER: org.apache.kafka.connect.storage.StringConverter
-      CONNECT_VALUE_CONVERTER: org.apache.kafka.connect.storage.StringConverter
-      CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
-      CONNECT_KEY_CONVERTER_SCHEMAS_ENABLE: "false"
-      CONNECT_REST_ADVERTISED_HOST_NAME: kafka-connect
-      CONNECT_REST_EXTENSION_CLASSES: org.apache.kafka.connect.rest.basic.auth.extension.BasicAuthSecurityRestExtension
-      CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components"
-      CLASSPATH: "/opt/kcm-plugins/*:/usr/share/confluent-hub-components/*"
-      KAFKA_OPTS: "-Djava.security.auth.login.config=/kafka/config/basic-auth/jaas.config"
-
-    volumes:
-        - ./kafka-connect/kafka_connect_jaas.config:/kafka/config/basic-auth/jaas.config
-        - ./kafka-connect/connect.password:/kafka/config/basic-auth/connect.password
-    depends_on:
-      - broker-1
-      - broker-2
-      - broker-3
-
+    depends_on: [controller-1, controller-2, controller-3]
 
 volumes:
   controller1-data:

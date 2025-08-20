@@ -6,3 +6,6 @@
 /kafka_brokers_docker_compose/certificates/broker-*/kafka.keystore.jks
 /kafka_brokers_docker_compose/certificates/broker-*/kafka.truststore.jks
 /kcm_with_docker_compose/data/files/KAFKA_CLUSTER/
+/kafka_brokers_docker_compose/certificates/ca/ca.key
+/kafka_brokers_docker_compose/certificates/ca/ca.pem
+/kafka_brokers_docker_compose/certificates/ca/ca.srl
