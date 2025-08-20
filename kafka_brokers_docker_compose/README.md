@@ -119,12 +119,6 @@ docker compose up -d controller-1 controller-2 controller-3
 docker compose up -d broker-1 broker-2 broker-3
 ```
 
-Tail logs (authentication errors are expected until users exist):
-
-```bash
-docker logs -f broker-1 | sed -n 's/.*\(SASL\|SCRAM\|auth\).*/�/p'
-```
-
 ---
 
 ## 4) Create **SCRAM users** (broker, app) over TLS using the PLAIN admin
@@ -182,15 +176,7 @@ In KCM, add a cluster with:
 * **Security protocol**: `SASL_SSL`
 * **SASL mechanism**: `SCRAM-SHA-512`
 * **Username/Password**: e.g. `app` / `app-secret`
-* **Trust material**: the CA used to sign broker certs (e.g. `certificates/ca/ca.pem`)
-
-If you run KCM in Docker/Podman, bind mount the CA (example):
-
-```bash
--v "$PWD/certificates/ca/ca.pem:/etc/ssl/certs/kcm-ca.pem:ro"
-```
-
-Then configure KCM to trust that file.
+* **TrustStore**: upload the kafka.truststore.jks file from any broker (e.g. `certificates/broker-1/kafka.truststore.jks`).
 
 ---
 
