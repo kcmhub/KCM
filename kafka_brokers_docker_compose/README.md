@@ -172,7 +172,7 @@ Use **KCM** as the testing tool instead of CLI utilities.
 
 In KCM, add a cluster with:
 
-* **Bootstrap servers**: `localhost:9493,localhost:9593,localhost:9693`
+* **Bootstrap servers**: `broker-1:9092,broker-2:9092,broker-3:9092`
 * **Security protocol**: `SASL_SSL`
 * **SASL mechanism**: `SCRAM-SHA-512`
 * **Username/Password**: e.g. `app` / `app-secret`
