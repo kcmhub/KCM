@@ -44,18 +44,6 @@ services:
     volumes:
       - redisdata:/data
 
-  redis-commander:
-    image: rediscommander/redis-commander:latest
-    container_name: redis-commander
-    restart: always
-    ports:
-      - "8081:8081"
-    environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-    depends_on:
-      - redis
-
   kcm-api:
     image: kafkaetech/kcm-api:latest
     container_name: kcm-api
@@ -74,6 +62,8 @@ services:
       KCM_LICENSE_KAFKA_TOPIC: "__kcm_license"
       KCM_LICENSE_SIGNATURE_PATH: "/app/license/license.sig"
       KCM_LICENSE_HISTORY_DIR: "/app/license/license-history"
+
+      KCM_LICENSE_CRL_PATH: "/app/license/kcm.crl"
 
       # Encryption keys
       KCM_ENCRYPT_PRIVATE_KEY: "/app/keys/private.pem"
