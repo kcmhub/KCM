@@ -9,7 +9,7 @@ Built with **Spring Boot 3**, **Angular**, **PostgreSQL**, and **Redis**, KCM he
 ## 🚀 Quickstart with Docker Compose
 
 ```bash
-git clone https://github.com/etech-data/KCM.git
+git clone https://github.com/kcmhub/KCM.git
 cd KCM/00_kcm_with_docker_compose
 docker network create kcm-net
 docker compose up -d
@@ -27,7 +27,6 @@ You can override defaults using a `.env` file or directly in your environment.
 
 | Variable                     | Default                            | Description                                 |
 | ---------------------------- | ---------------------------------- | ------------------------------------------- |
-| `KCM_APP_NAME`               | `kcm-manager`                      | Application name                            |
 | `KCM_DEFAULT_USER_ENABLED`   | `true`                             | Enable default user                         |
 | `KCM_DEFAULT_PASSWORD`       | `admin`                            | Default user password                       |
 | `KCM_LICENSE_PATH`           | `/license/license.json`            | Path to license JSON                        |
@@ -65,7 +64,7 @@ This project is **not open source**. It is licensed under a **Proprietary Evalua
 
 * 🛠️ Use is free for non-commercial evaluation
 * 🚫 Commercial use requires a license
-* 📬 Contact us: [contact@elite-group.fr](mailto:contact@elite-group.fr) to request your free evaluation license
+* 📬 Contact us: [contact@kcmhub.io](mailto:contact@kcmhub.io) to request your free evaluation license
 
 See [`LICENSE.txt`](./LICENSE.txt) for full terms.
 
@@ -76,7 +75,7 @@ See [`LICENSE.txt`](./LICENSE.txt) for full terms.
 * 🔗 [UI Docker Image](https://hub.docker.com/r/kafkaetech/kcm-ui)
 * 🔗 [API Docker Image](https://hub.docker.com/r/kafkaetech/kcm-api)
 * 🌍 [Official Website](https://www.kcmhub.io)
-* 📁 [Repository](https://github.com/etech-data/KCM)
+* 📁 [Repository](https://github.com/kcmhub/KCM)
 
 ---
 
