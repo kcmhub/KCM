@@ -82,7 +82,7 @@ services:
 
   broker-2:
     image: apache/kafka:latest
-    container_name: broker-1
+    container_name: broker-2
     ports:
       - "9292:9092"    # PLAINTEXT_HOST (client access)
     environment:
