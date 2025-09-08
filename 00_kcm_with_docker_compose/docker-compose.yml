@@ -46,6 +46,8 @@ services:
 
   kcm-api:
     image: kafkaetech/kcm-api:latest
+    pull_policy: always
+    restart: unless-stopped
     container_name: kcm-api
     depends_on:
       - postgres
@@ -100,6 +102,8 @@ services:
 
   kcm-ui:
     image: kafkaetech/kcm-ui:latest
+    pull_policy: always
+    restart: unless-stopped
     container_name: kcm-ui
     depends_on:
       - kcm-api
