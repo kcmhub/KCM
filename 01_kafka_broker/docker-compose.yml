@@ -1,0 +1,131 @@
+version: '3.9'
+
+# docker network create kcm-net
+networks:
+  default:
+    external:
+      name: kcm-net
+
+services:
+
+  # -------------------------
+  # Controllers (KRaft)
+  # -------------------------
+  controller-1:
+    image: apache/kafka:latest
+    container_name: controller-1
+    ports: ["19093:9093"]
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: controller
+      KAFKA_LISTENERS: CONTROLLER://:9093
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@controller-1:9093,2@controller-2:9093,3@controller-3:9093
+      KAFKA_LOG_DIRS: "/var/lib/kafka/data"
+    volumes:
+      - controller1-plain-data:/var/lib/kafka/data
+
+  controller-2:
+    image: apache/kafka:latest
+    container_name: controller-2
+    ports: ["29093:9093"]
+    environment:
+      KAFKA_NODE_ID: 2
+      KAFKA_PROCESS_ROLES: controller
+      KAFKA_LISTENERS: CONTROLLER://:9093
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@controller-1:9093,2@controller-2:9093,3@controller-3:9093
+      KAFKA_LOG_DIRS: "/var/lib/kafka/data"
+    volumes:
+      - controller2-plain-data:/var/lib/kafka/data
+
+  controller-3:
+    image: apache/kafka:latest
+    container_name: controller-3
+    ports: ["39093:9093"]
+    environment:
+      KAFKA_NODE_ID: 3
+      KAFKA_PROCESS_ROLES: controller
+      KAFKA_LISTENERS: CONTROLLER://:9093
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@controller-1:9093,2@controller-2:9093,3@controller-3:9093
+      KAFKA_LOG_DIRS: "/var/lib/kafka/data"
+    volumes:
+      - controller3-plain-data:/var/lib/kafka/data
+
+  # -------------------------
+  # Brokers (PLAINTEXT)
+  # -------------------------
+  broker-1:
+    image: apache/kafka:latest
+    container_name: broker-1
+    ports:
+      - "9192:9092"    # PLAINTEXT_HOST (client access)
+    environment:
+      KAFKA_NODE_ID: 4
+      KAFKA_PROCESS_ROLES: broker
+      KAFKA_LOG_DIRS: "/var/lib/kafka/data"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@controller-1:9093,2@controller-2:9093,3@controller-3:9093
+
+      KAFKA_LISTENERS: PLAINTEXT:9092,PLAINTEXT_HOST://:9192
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker-1:9092,PLAINTEXT_HOST://localhost:9192
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+
+    volumes:
+      - broker1-plain-data:/var/lib/kafka/data
+    depends_on: [controller-1, controller-2, controller-3]
+
+  broker-2:
+    image: apache/kafka:latest
+    container_name: broker-1
+    ports:
+      - "9292:9092"    # PLAINTEXT_HOST (client access)
+    environment:
+      KAFKA_NODE_ID: 5
+      KAFKA_PROCESS_ROLES: broker
+      KAFKA_LOG_DIRS: "/var/lib/kafka/data"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@controller-1:9093,2@controller-2:9093,3@controller-3:9093
+
+      KAFKA_LISTENERS: PLAINTEXT:9092,PLAINTEXT_HOST://:9292
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker-1:9092,PLAINTEXT_HOST://localhost:9292
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+
+    volumes:
+      - broker2-plain-data:/var/lib/kafka/data
+    depends_on: [ controller-1, controller-2, controller-3 ]
+
+  broker-3:
+    image: apache/kafka:latest
+    container_name: broker-3
+    ports:
+      - "9392:9092"    # PLAINTEXT_HOST (client access)
+    environment:
+      KAFKA_NODE_ID: 6
+      KAFKA_PROCESS_ROLES: broker
+      KAFKA_LOG_DIRS: "/var/lib/kafka/data"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@controller-1:9093,2@controller-2:9093,3@controller-3:9093
+
+      KAFKA_LISTENERS: PLAINTEXT:9092,PLAINTEXT_HOST://:9392
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker-1:9092,PLAINTEXT_HOST://localhost:9392
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+
+    volumes:
+      - broker3-plain-data:/var/lib/kafka/data
+    depends_on: [controller-1, controller-2, controller-3]
+
+volumes:
+  controller1-plain-data:
+  controller2-plain-data:
+  controller3-plain-data:
+  broker1-plain-data:
+  broker2-plain-data:
+  broker3-plain-data:
