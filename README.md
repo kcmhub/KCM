@@ -62,9 +62,11 @@ You can override defaults using a `.env` file or directly in your environment.
 
 This project is **not open source**. It is licensed under a **Proprietary Evaluation License**.
 
-* 🛠️ Use is free for non-commercial evaluation
-* 🚫 Commercial use requires a license
-* 📬 Contact us: [contact@kcmhub.io](mailto:contact@kcmhub.io) to request your free evaluation license
+- 🛠️ Free for **non-commercial evaluation**.
+- 🚫 **Commercial use** requires a paid [license](https://kcmhub.io/pricing.html).
+- 📬 Questions? Contact **contact@kcmhub.io**.
+- 🎓 **Students** may receive a **free 6-month license** by emailing a valid student ID to the same address.
+
 
 See [`LICENSE.txt`](./LICENSE.txt) for full terms.
 
