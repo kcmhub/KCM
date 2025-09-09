@@ -85,7 +85,7 @@ See [`LICENSE.txt`](./LICENSE.txt) for full terms.
 
 You can open issues or feedback directly on our GitHub repo. We also welcome feature suggestions, bug reports, and license requests.
 
-📮 For private requests or free license keys, please contact [contact@elite-group.fr](mailto:contact@elite-group.fr).
+📮 For private requests or free license keys, please contact [contact@kcmhub.io](mailto:contact@kcmhub.io).
 
 ---
 
