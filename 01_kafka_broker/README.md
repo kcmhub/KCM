@@ -206,4 +206,4 @@ Add a cluster in **KCM** with:
 * Switch to **TLS + SASL** for realistic environments (use our secured compose as a follow‑up).
 * Add **Kafka Connect**, **Schema Registry**, and your **KCM API/UI** services to the same network and point them at the brokers’ in‑network endpoints.
 
-[next](../02_secured_kafka_brokers/README.md) &rarr; Secure Kafka with TLS + SASL (SCRAM)
+[next](../02_security_kafka_with%20sasl/README.md) &rarr; Secure Kafka with TLS + SASL (SCRAM)
