@@ -155,23 +155,7 @@ These are the most widely used Kerberos servers in enterprises:
 
 ## 🖼️ Simplified diagram
 
-```text
-(Client) -- AS-REQ --> (KDC:AS)
-(Client) <-- AS-REP (TGT) -- (KDC)
-
-(Client) -- TGS-REQ (kafka/broker1) --> (KDC:TGS)
-(Client) <-- TGS-REP (ticket broker1) -- (KDC)
-(Client) -- Service Ticket --> (Broker1)
-(Broker1) <decrypts with keytab> ✅
-
-(Client) -- MetadataRequest --> (Broker1)
-(Client) <-- Broker list ---- (Broker1)
-
-(Client) -- TGS-REQ (kafka/broker2) --> (KDC:TGS)
-(Client) <-- TGS-REP (ticket broker2) -- (KDC)
-(Client) -- Service Ticket --> (Broker2)
-(Broker2) <decrypts with keytab> ✅
-```
+![img.png](kerberos_seq_diag.png)
 
 ---
 
