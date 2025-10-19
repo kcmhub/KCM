@@ -194,11 +194,11 @@ Before starting the container:
 Examples:
 - Windows (cmd.exe):
   ```cmd
-  scp youruser@kdc.kcm.lan:/etc/security/keytabs/kafka-broker1.keytab "D:\workspace\k_c_m\kafka_with_kerberos\keytabs\kafka-broker1.keytab"
+  scp youruser@kdc.kcm.lan:/etc/security/keytabs/kafka-broker1.keytab "[PATH_TO_YOUR_LOCAL_WORKSPACE]\k_c_m\02_security_kafka_with_kerberos\keytabs\kafka-broker1.keytab"
   ```
 - Linux/macOS:
   ```bash
-  scp youruser@kdc.kcm.lan:/etc/security/keytabs/kafka-broker1.keytab ./keytabs/kafka-broker1.keytab
+  scp youruser@kdc.kcm.lan:/etc/security/keytabs/kafka-broker1.keytab [PATH_TO_YOUR_LOCAL_WORKSPACE]/k_c_m/02_security_kafka_with_kerberos/keytabs/keytabs/kafka-broker1.keytab
   ```
 
 2) Ensure configuration files are present and consistent
