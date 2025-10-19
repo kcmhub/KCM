@@ -98,6 +98,11 @@ These are the most widely used Kerberos servers in enterprises:
 
 ## 🔄 Kafka + Kerberos Authentication Flow
 
+## 0. GSSAPI/SASL ?
+* Kafka uses **SASL/GSSAPI** for Kerberos authentication.
+* GSSAPI (Generic Security Services Application Program Interface) is a standard API for authentication, and SASL (Simple Authentication and Security Layer) is a framework for adding authentication support to connection-based protocols.
+* GSSAPI accept Kerberos v5 as the underlying mechanism [RFC 4120](https://www.rfc-editor.org/rfc/inline-errata/rfc4120.html).
+
 ### 1. Initial client authentication
 
 * The Kafka client (producer/consumer/admin) starts and needs to authenticate.
