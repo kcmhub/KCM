@@ -14,11 +14,21 @@ This document summarizes how **Kerberos (GSSAPI)** authentication works in a Kaf
 
     * **AS (Authentication Service)**: the entry point, it authenticates the client’s identity and issues a **Ticket Granting Ticket (TGT)**.
     * **TGS (Ticket Granting Service)**: uses the TGT to issue **Service Tickets** for specific services (e.g., Kafka brokers).
+    * **Database**: stores principals and their secret keys.
+* A **keytab** is a file containing pairs of principals and their encrypted keys. Services use keytabs to authenticate without human intervention.
+* **Realms** define the administrative domain for Kerberos. They are usually uppercase versions of the domain name (e.g., `EXAMPLE.COM`).
 
 ➡️ **Think of it this way:**
 
 * **AS** = "passport office" → proves your identity and gives you a passport (TGT).
 * **TGS** = "visa office" → takes your passport and gives you a visa (Service Ticket) for the service you want to access.
+* **Keytab** = "pre-approved ID card" → lets services prove who they are without needing a password.
+* **Realm** = "country" → the jurisdiction where your identity is recognized.
+* **Ticket** = "visa" → allows access to a specific service for a limited time.
+* **TGT** = "passport" → allows you to get visas for various services without re-proving your identity each time.
+* **KDC** = "government agency" → the authority that issues passports and visas.
+* **Client** = "user or application" → the entity trying to access a service. 
+* **Service** = "server or application" → the entity providing a service that requires authentication.
 
 ---
 
