@@ -1,0 +1,54 @@
+services:
+  kafka:
+    image: apache/kafka:3.9.1
+    container_name: kafka-gssapi
+    hostname: broker1.kcm.lan
+    restart: unless-stopped
+    ports:
+      - "9093:9093"        # exposed SASL_GSSAPI listener
+      - "9092:9092"        # internal (PLAINTEXT) listener for inter-broker/local tests
+    environment:
+      # --- KRaft (no ZooKeeper)
+      KAFKA_PROCESS_ROLES: "broker,controller"
+      KAFKA_NODE_ID: "1"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@broker1.kcm.lan:9094"
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+      KAFKA_LISTENERS: >
+        INTERNAL://0.0.0.0:9092,
+        SASL_PLAINTEXT://0.0.0.0:9093,
+        CONTROLLER://0.0.0.0:9094
+      KAFKA_ADVERTISED_LISTENERS: >
+        INTERNAL://broker1.kcm.lan:9092,
+        SASL_PLAINTEXT://broker1.kcm.lan:9093,
+        CONTROLLER://broker1.kcm.lan:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "INTERNAL:PLAINTEXT,SASL_PLAINTEXT:SASL_PLAINTEXT,CONTROLLER:PLAINTEXT"
+      KAFKA_INTER_BROKER_LISTENER_NAME: "INTERNAL"
+
+      # --- GSSAPI
+      KAFKA_SASL_ENABLED_MECHANISMS: "GSSAPI"
+      KAFKA_SASL_KERBEROS_SERVICE_NAME: "kafka"   # must match SPN kafka/<fqdn>
+      KAFKA_OPTS: >-
+        -Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf
+        -Djava.security.krb5.conf=/etc/krb5.conf
+        -Dsun.security.krb5.debug=false
+
+      # --- KRaft cluster id (example value; can be any Base64URL UUID)
+      KAFKA_CLUSTER_ID: "4L6g3nShT-eMCtK--X86w"
+
+      # --- Convenience
+      KAFKA_LOG_DIRS: "/var/lib/kafka/data"
+      KAFKA_NUM_PARTITIONS: "1"
+
+    volumes:
+      # Relative mounts (work on Windows/macOS/Linux)
+      - ./keytabs/kafka-broker1.keytab:/etc/security/keytabs/kafka-broker1.keytab:ro
+      - ./krb5.conf:/etc/krb5.conf:ro
+      - ./kafka_server_jaas.conf:/etc/kafka/kafka_server_jaas.conf:ro
+      # Data (persist if desired)
+      - ./data:/var/lib/kafka/data
+
+    # Allow the container to resolve internal FQDNs
+    extra_hosts:
+      # Replace <HOST_IP> with the IP of your host/VM (where the KDC runs if local)
+      - "broker1.kcm.lan:192.168.10.108"
+      - "kdc.kcm.lan:192.168.10.108"
