@@ -2,7 +2,7 @@
 
 Kafka Cluster Manager (KCM) is a lightweight DevOps-oriented platform to **monitor, manage and interact with Apache Kafka clusters** via a modern UI and powerful REST API.
 
-Built with **Spring Boot 3**, **Angular**, **PostgreSQL**, and **Redis**, KCM helps teams gain insights, visibility, and control over Kafka environments.
+KCM helps teams gain insights, visibility, and control over Kafka environments.
 
 ---
 
