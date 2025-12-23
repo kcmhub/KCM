@@ -23,29 +23,83 @@ Access:
 
 ## ⚙️ Configuration via Environment Variables
 
-You can override defaults using a `.env` file or directly in your environment.
+KCM can be fully configured via environment variables. The values below are the defaults used by the **production profile** when no value is provided.
 
-| Variable                     | Default                            | Description                                 |
-| ---------------------------- | ---------------------------------- | ------------------------------------------- |
-| `KCM_DEFAULT_USER_ENABLED`   | `true`                             | Enable default user                         |
-| `KCM_DEFAULT_PASSWORD`       | `admin`                            | Default user password                       |
-| `KCM_LICENSE_PATH`           | `/license/license.json`            | Path to license JSON                        |
-| `KCM_LICENSE_KAFKA_TOPIC`    | `__kcm_license`                    | Kafka topic used to distribute license info |
-| `KCM_LICENSE_SIGNATURE_PATH` | `/license/license.sig`             | Path to license signature                   |
-| `KCM_LICENSE_HISTORY_DIR`    | `/license/license-history`         | Directory to store license usage history    |
-| `KCM_ENCRYPT_PRIVATE_KEY`    | `/app/keys/private.pem`            | Private key path for encryption             |
-| `KCM_ENCRYPT_PUBLIC_KEY`     | `/app/keys/public.pem`             | Public key path for encryption              |
-| `KCM_JWT_PERSISTENCE_MODE`   | `JDBC`                             | JWT persistence method                      |
-| `KCM_JWT_TOKEN_VALIDITY`     | `86400`                            | JWT token validity in seconds               |
-| `KCM_JWT_PRIVATE_KEY`        | `/app/keys/private.pem`            | JWT private key path                        |
-| `KCM_JWT_PUBLIC_KEY`         | `/app/keys/public.pem`             | JWT public key path                         |
-| `KCM_APP_FILES_PATH`         | `/data`                            | Default file storage path                   |
-| `KCM_DB_URL`                 | `jdbc:postgresql://db:5432/kcm_db` | PostgreSQL JDBC URL                         |
-| `KCM_DB_USER`                | `kcm_user`                         | PostgreSQL user                             |
-| `KCM_DB_PWD`                 | `kcm_password`                     | PostgreSQL password                         |
-| `KCM_ADMIN_CLIENT_ID`        | `kc-admin-client`                  | Kafka admin client ID                       |
-| `KCM_REDIS_HOST`             | `redis`                            | Redis hostname                              |
-| `KCM_REDIS_PORT`             | `6379`                             | Redis port                                  |
+### 🔸 Core application & security
+
+| Variable                     | Default                 | Description                                                                                                                                                                                                       |
+| ---------------------------- | ----------------------- |-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `KCM_APP_PORT`               | `9090`                  | HTTP port used by the KCM API inside the container.                                                                                                                                                               |
+| `KCM_COOKIE_NAME`            | `KCM_AT`                | Name of the authentication cookie that stores the access token.                                                                                                                                                   |
+| `KCM_COOKIE_DOMAIN`          | ``                      | Cookie domain. Example: `.kcmhub.io` when UI and API run on subdomains.                                                                                                                                           |
+| `KCM_COOKIE_MAX_AGE_SECONDS` | `86400`                 | Lifetime of the authentication cookie in seconds.                                                                                                                                                                 |
+| `KCM_REDIRECT_ALLOWLIST`     | `http://localhost:4200` | Comma-separated list of allowed **redirect origins** after login (format: `scheme://host[:port]`, no trailing slash). Paths are ignored during validation. Example: `https://app.kcmhub.io,http://localhost:4200` |
+| `KCM_DEFAULT_REDIRECT`       | `http://localhost:4200` | Default post-login/logout redirect URL (should be one of the allowed origins or a safe same-origin path).                                                                                                         |
+| `KCM_DEFAULT_USER_ENABLED`   | `true`                  | Whether to enable the built-in default admin user (intended for first setup or demos only).                                                                                                                       |
+| `KCM_DEFAULT_PASSWORD`       | `admin`                 | Password of the default admin user when it is enabled.                                                                                                                                                            |
+
+### 🔸 License management
+
+| Variable                     | Default                    | Description                                                                                                               |
+| ---------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `KCM_LICENSE_PATH`           | `/license/license.json`    | Path to the KCM license JSON file (typically mounted from the host, e.g. `/app/license`).                                 |
+| `KCM_LICENSE_KAFKA_TOPIC`    | `__kcm_license`            | Kafka topic used to distribute license information across KCM instances.                                                  |
+| `KCM_LICENSE_SIGNATURE_PATH` | `/license/license.sig`     | Path to the detached signature file used to verify license integrity.                                                     |
+| `KCM_LICENSE_HISTORY_DIR`    | `/license/license-history` | Directory where license activation / usage history is stored.                                                             |
+| `KCM_LICENSE_CRL_PATH`       | ``                         | Optional path to the license Certificate Revocation List (CRL). If set, CRL is used to check revoked or invalid licenses. |
+
+### 🔸 Encryption keys
+
+| Variable                  | Default                 | Description                                                       |
+| ------------------------- | ----------------------- | ----------------------------------------------------------------- |
+| `KCM_ENCRYPT_PRIVATE_KEY` | `/app/keys/private.pem` | Path to the private key used for data encryption / decryption.    |
+| `KCM_ENCRYPT_PUBLIC_KEY`  | `/app/keys/public.pem`  | Path to the public key used for data encryption where applicable. |
+
+### 🔸 JWT configuration
+
+| Variable                   | Default                 | Description                                                              |
+| -------------------------- | ----------------------- | ------------------------------------------------------------------------ |
+| `KCM_JWT_ISSUER`           | `kcm`                   | Issuer (`iss`) claim used when generating JWT access tokens.             |
+| `KCM_JWT_PERSISTENCE_MODE` | `JDBC`                  | Persistence strategy for JWT tokens (e.g. `JDBC`, `REDIS` if supported). |
+| `KCM_JWT_TOKEN_VALIDITY`   | `86400`                 | JWT token validity period in seconds.                                    |
+| `KCM_JWT_PRIVATE_KEY`      | `/app/keys/private.pem` | Private key used to sign JWT tokens.                                     |
+| `KCM_JWT_PUBLIC_KEY`       | `/app/keys/public.pem`  | Public key used to validate JWT signatures.                              |
+
+### 🔸 File storage
+
+| Variable             | Default | Description                                                                         |
+| -------------------- | ------- | ----------------------------------------------------------------------------------- |
+| `KCM_APP_FILES_PATH` | `/data` | Base directory for file storage (uploads, exports, temporary files) inside the app. |
+
+### 🔸 PostgreSQL database
+
+| Variable                           | Default                            | Description                                                              |
+| ---------------------------------- | ---------------------------------- | ------------------------------------------------------------------------ |
+| `KCM_DB_URL`                       | `jdbc:postgresql://db:5432/kcm_db` | JDBC URL for the PostgreSQL database.                                    |
+| `KCM_DB_USER`                      | `kcm_user`                         | PostgreSQL username.                                                     |
+| `KCM_DB_PWD`                       | `kcm_password`                     | PostgreSQL password.                                                     |
+| `KCM_DB_HIKARI_MAX_POOL_SIZE`      | `20`                               | Maximum number of connections in the HikariCP connection pool.           |
+| `KCM_DB_HIKARI_MIN_IDLE`           | `5`                                | Minimum number of idle connections in the pool.                          |
+| `KCM_DB_HIKARI_IDLE_TIMEOUT`       | `600000`                           | Time in milliseconds before an idle connection is removed from the pool. |
+| `KCM_DB_HIKARI_CONNECTION_TIMEOUT` | `30000`                            | Maximum time in milliseconds to wait for a connection from the pool.     |
+| `KCM_DB_HIKARI_MAX_LIFETIME`       | `1800000`                          | Maximum lifetime in milliseconds of a connection in the pool.            |
+| `KCM_DB_HIKARI_POOL_NAME`          | `KCMHikariCP`                      | Name of the HikariCP connection pool.                                    |
+
+### 🔸 Redis cache
+
+| Variable                  | Default | Description                                                            |
+| ------------------------- | ------- | ---------------------------------------------------------------------- |
+| `KCM_REDIS_CLUSTER_NODES` | ``      | Optional Redis cluster nodes definition (comma-separated `host:port`). |
+| `KCM_REDIS_HOST`          | `redis` | Redis hostname.                                                        |
+| `KCM_REDIS_PORT`          | `6379`  | Redis port.                                                            |
+| `KCM_REDIS_DB`            | `0`     | Redis database index used by KCM.                                      |
+| `KCM_REDIS_TIMEOUT`       | `2000`  | Redis connection timeout in milliseconds.                              |
+
+### 🔸 Kafka admin client
+
+| Variable              | Default           | Description                                         |
+| --------------------- | ----------------- | --------------------------------------------------- |
+| `KCM_ADMIN_CLIENT_ID` | `kc-admin-client` | Kafka `client.id` used by KCM for admin operations. |
 
 ---
 
@@ -62,11 +116,10 @@ You can override defaults using a `.env` file or directly in your environment.
 
 This project is **not open source**. It is licensed under a **Proprietary Evaluation License**.
 
-- 🛠️ Free for **non-commercial evaluation**.
-- 🚫 **Commercial use** requires a paid [license](https://kcmhub.io/pricing.html).
-- 📬 Questions? Contact **contact@kcmhub.io**.
-- 🎓 **Students** may receive a **free 6-month license** by emailing a valid student ID to the same address.
-
+* 🛠️ Free for **non-commercial evaluation**.
+* 🚫 **Commercial use** requires a paid [license](https://kcmhub.io/pricing.html).
+* 📬 Questions? Contact **[contact@kcmhub.io](mailto:contact@kcmhub.io)**.
+* 🎓 **Students** may receive a **free 6-month license** by emailing a valid student ID to the same address.
 
 See [`LICENSE.txt`](./LICENSE.txt) for full terms.
 
