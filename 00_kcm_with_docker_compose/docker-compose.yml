@@ -3,9 +3,8 @@ version: "3.9"
 # Ensure the network is created before running this compose file
 # docker network create kcm-net
 networks:
-  default:
-    external:
-      name: kcm-net
+  kcm-net:
+    name: kcm-net
 
 services:
   postgres:
@@ -14,76 +13,76 @@ services:
     environment:
       POSTGRES_DB: kcm_db
       POSTGRES_USER: kcm_user
-      POSTGRES_PASSWORD: kcm_password
-    ports:
-      - "5432:5432"
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-kcm_password}
     volumes:
       - pgdata:/var/lib/postgresql/data
-
-  pgadmin:
-    image: dpage/pgadmin4:8
-    container_name: pgadmin
-    depends_on:
-      - postgres
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-email@mycompany.io}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
-      PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION: "True"
-      PGADMIN_CONFIG_LOGIN_BANNER: "'Authorized users only.'"
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
-    ports:
-      - "5050:80"             # pgAdmin accessible sur http://localhost:5050
-    # Sécurité: retire l'exposition de port si tu mets ça en prod derrière un proxy.
+    networks: [kcm-net]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
 
   redis:
     image: redis:6.2
     container_name: kcm-redis
-    ports:
-      - "6379:6379"
     volumes:
       - redisdata:/data
+    networks: [kcm-net]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
 
   kcm-api:
-    image: kafkaetech/kcm-api:latest
+    image: kafkaetech/kcm-api:1.0.4
     pull_policy: always
     restart: unless-stopped
     container_name: kcm-api
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks: [kcm-net]
     ports:
       - "8080:8080"
     environment:
-      # Security: Default user
+      # IMPORTANT: align port mapping with Spring config
+      KCM_APP_PORT: "8080"
+
+      # Redirects (UI runs on http://localhost)
+      KCM_REDIRECT_ALLOWLIST: "http://localhost"
+      KCM_DEFAULT_REDIRECT: "http://localhost"
+
+      # Default user
       KCM_DEFAULT_USER_ENABLED: "true"
-      KCM_DEFAULT_PASSWORD: "admin"
+      KCM_DEFAULT_PASSWORD: ${KCM_DEFAULT_PASSWORD:-admin}
 
       # License
       KCM_LICENSE_PATH: "/app/license/license.json"
-      KCM_LICENSE_KAFKA_TOPIC: "__kcm_license"
       KCM_LICENSE_SIGNATURE_PATH: "/app/license/license.sig"
       KCM_LICENSE_HISTORY_DIR: "/app/license/license-history"
-
-      KCM_LICENSE_CRL_PATH: "/app/license/kcm.crl"
+      KCM_LICENSE_KAFKA_TOPIC: "__kcm_license"
 
       # Encryption keys
       KCM_ENCRYPT_PRIVATE_KEY: "/app/keys/private.pem"
       KCM_ENCRYPT_PUBLIC_KEY: "/app/keys/public.pem"
 
       # JWT
-      KCM_JWT_PERSISTENCE_MODE: "JDBC"
+      KCM_JWT_ISSUER: "kcm"
       KCM_JWT_TOKEN_VALIDITY: "86400"
       KCM_JWT_PRIVATE_KEY: "/app/keys/private.pem"
       KCM_JWT_PUBLIC_KEY: "/app/keys/public.pem"
 
-      # App file storage
+      # Files
       KCM_APP_FILES_PATH: "/app/files"
 
       # PostgreSQL
       KCM_DB_URL: "jdbc:postgresql://postgres:5432/kcm_db"
       KCM_DB_USER: "kcm_user"
-      KCM_DB_PWD: "kcm_password"
+      KCM_DB_PWD: ${POSTGRES_PASSWORD:-kcm_password}
 
       # Kafka
       KCM_ADMIN_CLIENT_ID: "kc-admin-client"
@@ -95,18 +94,19 @@ services:
       KCM_REDIS_TIMEOUT: "2000"
 
     volumes:
-      - ./data/keys:/app/keys
+      - ./data/keys:/app/keys:ro
       - ./data/files:/app/files
-      - kcm-app:/app
+      - ./data/license:/app/license:ro
       - kcm-evaluation:/tmp/evaluation
 
   kcm-ui:
-    image: kafkaetech/kcm-ui:latest
+    image: kafkaetech/kcm-ui:1.0.4
     pull_policy: always
     restart: unless-stopped
     container_name: kcm-ui
     depends_on:
       - kcm-api
+    networks: [kcm-net]
     ports:
       - "80:80"
     volumes:
@@ -117,8 +117,4 @@ volumes:
   pgdata:
   pgadmin_data:
   redisdata:
-  kcm-license:
-  kcm-keys:
-  kcm-files:
-  kcm-app:
   kcm-evaluation:
