@@ -36,7 +36,7 @@ services:
       retries: 20
 
   kcm-api:
-    image: kafkaetech/kcm-api:1.0.7
+    image: kafkaetech/kcm-api:latest
     restart: unless-stopped
     container_name: kcm-api
     depends_on:
@@ -99,7 +99,7 @@ services:
       - kcm-evaluation:/tmp/evaluation
 
   kcm-ui:
-    image: kafkaetech/kcm-ui:1.0.7
+    image: kafkaetech/kcm-ui:latest
     pull_policy: always
     restart: unless-stopped
     container_name: kcm-ui
