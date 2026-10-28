@@ -114,7 +114,7 @@ KCM samples the status of every connector and task of each Kafka Connect cluster
 
 ### 🔸 AI assistant, beta (since 1.1.0)
 
-Analysis of a consumer group with a local model served by [Ollama](https://ollama.com). Disabled by default. While it is enabled, run a single kcm-api instance (analyses are kept in memory).
+Analysis of a consumer group with a local model served by [Ollama](https://ollama.com). Disabled by default. Analyses are stored in the database and shared by every kcm-api instance.
 
 | Variable                        | Default                  | Description                                                   |
 | ------------------------------- | ------------------------ | ------------------------------------------------------------- |
