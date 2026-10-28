@@ -82,6 +82,35 @@ services:
       KCM_REDIS_PORT: "6379"
       KCM_REDIS_DB: "0"
       KCM_REDIS_TIMEOUT: "2000"
+      KCM_REDIS_CLUSTER_NODES: ""
+
+      # Authentication cookie
+      KCM_COOKIE_NAME: "KCM_AT"
+      KCM_COOKIE_DOMAIN: ""
+      KCM_COOKIE_MAX_AGE_SECONDS: "86400"
+
+      # JWT persistence
+      KCM_JWT_PERSISTENCE_MODE: "JDBC"
+
+      # PostgreSQL connection pool (HikariCP)
+      KCM_DB_HIKARI_MAX_POOL_SIZE: "20"
+      KCM_DB_HIKARI_MIN_IDLE: "5"
+      KCM_DB_HIKARI_IDLE_TIMEOUT: "600000"
+      KCM_DB_HIKARI_CONNECTION_TIMEOUT: "30000"
+      KCM_DB_HIKARI_MAX_LIFETIME: "1800000"
+      KCM_DB_HIKARI_POOL_NAME: "KCMHikariCP"
+
+      # Connector status history (since 1.1.0)
+      KCM_CONNECT_STATUS_HISTORY_ENABLED: "true"
+      KCM_CONNECT_STATUS_HISTORY_CRON: "0 2/5 * * * *"
+      KCM_CONNECT_STATUS_HISTORY_INTERVAL_SECONDS: "300"
+      KCM_CONNECT_STATUS_HISTORY_RETENTION_DAYS: "30"
+
+      # AI assistant, beta (since 1.1.0): set KCM_ASSISTANT_ENABLED to "true" and point to your Ollama
+      KCM_ASSISTANT_ENABLED: "false"
+      KCM_ASSISTANT_OLLAMA_URL: "http://host.docker.internal:11434"
+      KCM_ASSISTANT_MODEL: "gemma3:4b"
+      KCM_ASSISTANT_TIMEOUT_SECONDS: "120"
 
     volumes:
       - ./data/keys:/app/keys:ro
