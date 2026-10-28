@@ -46,7 +46,6 @@ KCM can be fully configured via environment variables. The values below are the 
 | `KCM_LICENSE_KAFKA_TOPIC`    | `__kcm_license`            | Kafka topic used to distribute license information across KCM instances.                                                  |
 | `KCM_LICENSE_SIGNATURE_PATH` | `/license/license.sig`     | Path to the detached signature file used to verify license integrity.                                                     |
 | `KCM_LICENSE_HISTORY_DIR`    | `/license/license-history` | Directory where license activation / usage history is stored.                                                             |
-| `KCM_LICENSE_CRL_PATH`       | ``                         | Optional path to the license Certificate Revocation List (CRL). If set, CRL is used to check revoked or invalid licenses. |
 
 ### 🔸 Encryption keys
 
