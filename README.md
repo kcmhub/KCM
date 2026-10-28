@@ -101,6 +101,28 @@ KCM can be fully configured via environment variables. The values below are the 
 | --------------------- | ----------------- | --------------------------------------------------- |
 | `KCM_ADMIN_CLIENT_ID` | `kc-admin-client` | Kafka `client.id` used by KCM for admin operations. |
 
+### 🔸 Connector status history (since 1.1.0)
+
+KCM samples the status of every connector and task of each Kafka Connect cluster and keeps the history (status history tab of a connector, availability column of the connectors list).
+
+| Variable                                      | Default         | Description                                                                 |
+| --------------------------------------------- | --------------- | --------------------------------------------------------------------------- |
+| `KCM_CONNECT_STATUS_HISTORY_ENABLED`          | `true`          | Enables the sampling and the history.                                        |
+| `KCM_CONNECT_STATUS_HISTORY_CRON`             | `0 2/5 * * * *` | Sampling schedule (Spring cron, 6 fields).                                   |
+| `KCM_CONNECT_STATUS_HISTORY_INTERVAL_SECONDS` | `300`           | Sampling period in seconds. Keep it equal to the period of the cron above.  |
+| `KCM_CONNECT_STATUS_HISTORY_RETENTION_DAYS`   | `30`            | Number of days the history is kept.                                          |
+
+### 🔸 AI assistant, beta (since 1.1.0)
+
+Analysis of a consumer group with a local model served by [Ollama](https://ollama.com). Disabled by default. While it is enabled, run a single kcm-api instance (analyses are kept in memory).
+
+| Variable                        | Default                  | Description                                                   |
+| ------------------------------- | ------------------------ | ------------------------------------------------------------- |
+| `KCM_ASSISTANT_ENABLED`         | `false`                  | Enables the assistant.                                        |
+| `KCM_ASSISTANT_OLLAMA_URL`      | `http://localhost:11434` | Ollama URL, reachable from the kcm-api container.             |
+| `KCM_ASSISTANT_MODEL`           | `gemma3:4b`              | Model used for the analysis (must be pulled in Ollama).       |
+| `KCM_ASSISTANT_TIMEOUT_SECONDS` | `120`                    | Maximum duration of one call to the model, in seconds.        |
+
 ---
 
 ## 📦 Docker Images
