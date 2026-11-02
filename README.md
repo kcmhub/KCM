@@ -21,6 +21,26 @@ Access:
 
 ---
 
+## ☸️ Kubernetes with Helm
+
+The Helm chart is a public OCI artifact on Docker Hub: `oci://registry-1.docker.io/kafkaetech/kcm` (chart version = KCM version, Helm 3.8+).
+
+```bash
+# JWT key pair of the API, created once before the install
+mkdir -p keys
+openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out keys/private.pem
+openssl pkey -in keys/private.pem -pubout -out keys/public.pem
+kubectl create namespace kcm
+kubectl -n kcm create secret generic kcm-api-keys --from-file=keys
+
+# KCM with the embedded PostgreSQL and Redis
+helm upgrade --install kcm oci://registry-1.docker.io/kafkaetech/kcm --version 1.1.2 -n kcm   --set ingress.host=kcm.example.com   --set ui.runtimeConfig.apiUrl=http://kcm.example.com   --set ui.runtimeConfig.wsUrl=ws://kcm.example.com   --set postgres.enabled=true --set redis.enabled=true
+```
+
+The chart has no default password: the `admin` password is generated at install, `helm install` prints the command to read it. Every value is documented by `helm show values oci://registry-1.docker.io/kafkaetech/kcm --version 1.1.2`; the environment variables below go under `api.env` (the passwords under `api.secret`).
+
+---
+
 ## ⚙️ Configuration via Environment Variables
 
 KCM can be fully configured via environment variables. The values below are the defaults used by the **production profile** when no value is provided.
@@ -131,6 +151,7 @@ Analysis of a consumer group with a local model served by [Ollama](https://ollam
 | -------- | ------------------------------------------------------------------- |
 | Backend  | [`kafkaetech/kcm-api`](https://hub.docker.com/r/kafkaetech/kcm-api) |
 | Frontend | [`kafkaetech/kcm-ui`](https://hub.docker.com/r/kafkaetech/kcm-ui)   |
+| Helm chart | [`kafkaetech/kcm`](https://hub.docker.com/r/kafkaetech/kcm) (`oci://registry-1.docker.io/kafkaetech/kcm`) |
 
 ---
 
@@ -151,6 +172,7 @@ See [`LICENSE.txt`](./LICENSE.txt) for full terms.
 
 * 🔗 [UI Docker Image](https://hub.docker.com/r/kafkaetech/kcm-ui)
 * 🔗 [API Docker Image](https://hub.docker.com/r/kafkaetech/kcm-api)
+* 🔗 [Helm chart](https://hub.docker.com/r/kafkaetech/kcm)
 * 🌍 [Official Website](https://www.kcmhub.io)
 * 📁 [Repository](https://github.com/kcmhub/KCM)
 
