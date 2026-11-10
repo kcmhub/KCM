@@ -19,6 +19,34 @@ Access:
 
 * 🖥️ UI: [http://localhost](http://localhost)
 
+At the first start the API generates its two key pairs in `00_kcm_with_docker_compose/data/keys` (`jwt/` signs the
+sessions, `encryption/` protects the secrets stored in the database). Back up this directory with the database, and
+never share it. Set `KCM_DEFAULT_PASSWORD` before the first start, or change the `admin` password right away.
+
+### ⚠️ Upgrade from 1.2.0 or earlier: regenerate the keys and change your secrets
+
+Up to 1.2.0 this repository shipped a key pair in `data/keys` (`private.pem` / `public.pem`), used both to sign
+the sessions and to encrypt the stored secrets. **That pair is public: consider it compromised.** Anyone could sign
+a session accepted by an install that used it. From 1.2.1 the API refuses to start with it as JWT pair.
+
+1. Update this repository (`git pull`) and keep your `data/keys/private.pem` where it is for now.
+2. `docker compose pull && docker compose up -d`. At startup the API:
+   * generates two new pairs in `data/keys/jwt` and `data/keys/encryption`;
+   * reads the old pair through `KCM_ENCRYPT_PREVIOUS_PRIVATE_KEY` and re-encrypts every stored secret with the new
+     encryption pair (log line `Key change: N secret(s) re-encrypted with the current key`).
+
+   Every user signs in again (sessions signed with the old key are refused).
+3. Check the API log (`docker logs kcm-api`): no line `secret(s) in ... encrypted with another key`.
+4. Delete the old pair: `data/keys/private.pem` and `data/keys/public.pem`.
+5. **Change the secrets stored in KCM at their source**, then enter them again in KCM: Kafka SASL passwords and
+   JAAS configurations, Schema Registry, Kafka Connect and ksqlDB credentials, SSO client secrets, Git and
+   Confluent Cloud credentials. With the old public key, anyone holding a copy of the database could read them.
+6. Change the `admin` password if it is still the default one.
+
+If your `docker-compose.yml` is a modified copy, apply the changes of the environment section below
+(`KCM_KEYS_GENERATE_IF_MISSING`, `KCM_JWT_*`, `KCM_ENCRYPT_*`, `KCM_ENCRYPT_PREVIOUS_PRIVATE_KEY`) and mount
+`./data/keys` writable (no `:ro`).
+
 ---
 
 ## ☸️ Kubernetes with Helm
@@ -70,10 +98,12 @@ KCM can be fully configured via environment variables. The values below are the 
 
 ### 🔸 Encryption keys
 
-| Variable                  | Default                 | Description                                                       |
-| ------------------------- | ----------------------- | ----------------------------------------------------------------- |
-| `KCM_ENCRYPT_PRIVATE_KEY` | `/app/keys/private.pem` | Path to the private key used for data encryption / decryption.    |
-| `KCM_ENCRYPT_PUBLIC_KEY`  | `/app/keys/public.pem`  | Path to the public key used for data encryption where applicable. |
+| Variable                           | Default (compose)                  | Description                                                                                                                                                                         |
+| ---------------------------------- | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `KCM_KEYS_GENERATE_IF_MISSING`     | `true` (application: `false`)      | Since 1.2.1. Generates a missing JWT or encryption key pair at startup. An existing file is never replaced; a pair with only one of its two files stops the startup.                  |
+| `KCM_ENCRYPT_PRIVATE_KEY`          | `/app/keys/encryption/private.pem` | Private key (PKCS#8 PEM) decrypting the secrets stored in the database. Distinct from the JWT pair since 1.2.1.                                                                       |
+| `KCM_ENCRYPT_PUBLIC_KEY`           | `/app/keys/encryption/public.pem`  | Public key (X.509 PEM) encrypting the secrets stored in the database.                                                                                                                |
+| `KCM_ENCRYPT_PREVIOUS_PRIVATE_KEY` | `/app/keys/private.pem` (application: empty) | Since 1.2.1. Private key of the previous encryption pair: the secrets it encrypted are still read and re-encrypted with the current pair at startup. Ignored when the file does not exist. |
 
 ### 🔸 JWT configuration
 
@@ -82,8 +112,8 @@ KCM can be fully configured via environment variables. The values below are the 
 | `KCM_JWT_ISSUER`           | `kcm`                   | Issuer (`iss`) claim used when generating JWT access tokens.             |
 | `KCM_JWT_PERSISTENCE_MODE` | `JDBC`                  | Persistence strategy for JWT tokens (e.g. `JDBC`, `REDIS` if supported). |
 | `KCM_JWT_TOKEN_VALIDITY`   | `86400`                 | JWT token validity period in seconds.                                    |
-| `KCM_JWT_PRIVATE_KEY`      | `/app/keys/private.pem` | Private key used to sign JWT tokens.                                     |
-| `KCM_JWT_PUBLIC_KEY`       | `/app/keys/public.pem`  | Public key used to validate JWT signatures.                              |
+| `KCM_JWT_PRIVATE_KEY`      | `/app/keys/jwt/private.pem` | Private key used to sign JWT tokens (distinct from the encryption pair since 1.2.1). |
+| `KCM_JWT_PUBLIC_KEY`       | `/app/keys/jwt/public.pem`  | Public key used to validate JWT signatures.                              |
 
 ### 🔸 File storage
 
