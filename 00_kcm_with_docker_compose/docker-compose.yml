@@ -56,15 +56,23 @@ services:
       KCM_LICENSE_HISTORY_DIR: "/app/license/license-history"
       KCM_LICENSE_KAFKA_TOPIC: "__kcm_license"
 
-      # Encryption keys
-      KCM_ENCRYPT_PRIVATE_KEY: "/app/keys/private.pem"
-      KCM_ENCRYPT_PUBLIC_KEY: "/app/keys/public.pem"
+      # Key pairs (since 1.2.1): generated at the first start in ./data/keys/jwt and ./data/keys/encryption,
+      # never replaced afterwards. Back up ./data/keys with the database: without the encryption pair, the
+      # secrets stored by KCM cannot be read.
+      KCM_KEYS_GENERATE_IF_MISSING: "true"
+
+      # Encryption keys (secrets stored in the database)
+      KCM_ENCRYPT_PRIVATE_KEY: "/app/keys/encryption/private.pem"
+      KCM_ENCRYPT_PUBLIC_KEY: "/app/keys/encryption/public.pem"
+      # Upgrade from 1.2.0 or earlier: the old single pair. Its secrets are re-encrypted with the new pair at
+      # startup; ignored when the file does not exist. See README "Upgrade from 1.2.0 or earlier".
+      KCM_ENCRYPT_PREVIOUS_PRIVATE_KEY: "/app/keys/private.pem"
 
       # JWT
       KCM_JWT_ISSUER: "kcm"
       KCM_JWT_TOKEN_VALIDITY: "86400"
-      KCM_JWT_PRIVATE_KEY: "/app/keys/private.pem"
-      KCM_JWT_PUBLIC_KEY: "/app/keys/public.pem"
+      KCM_JWT_PRIVATE_KEY: "/app/keys/jwt/private.pem"
+      KCM_JWT_PUBLIC_KEY: "/app/keys/jwt/public.pem"
 
       # Files
       KCM_APP_FILES_PATH: "/app/files"
@@ -113,7 +121,8 @@ services:
       KCM_ASSISTANT_TIMEOUT_SECONDS: "120"
 
     volumes:
-      - ./data/keys:/app/keys:ro
+      # Writable: the key pairs are generated there at the first start
+      - ./data/keys:/app/keys
       - ./data/files:/app/files
       - kcm-license:/app/license
       - kcm-evaluation:/tmp/evaluation
