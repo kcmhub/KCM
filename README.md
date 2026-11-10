@@ -62,10 +62,10 @@ kubectl create namespace kcm
 kubectl -n kcm create secret generic kcm-api-keys --from-file=keys
 
 # KCM with the embedded PostgreSQL and Redis
-helm upgrade --install kcm oci://registry-1.docker.io/kafkaetech/kcm --version 1.2.0 -n kcm   --set ingress.host=kcm.example.com   --set ui.runtimeConfig.apiUrl=http://kcm.example.com   --set ui.runtimeConfig.wsUrl=ws://kcm.example.com   --set postgres.enabled=true --set redis.enabled=true
+helm upgrade --install kcm oci://registry-1.docker.io/kafkaetech/kcm --version 1.2.1 -n kcm   --set ingress.host=kcm.example.com   --set ui.runtimeConfig.apiUrl=http://kcm.example.com   --set ui.runtimeConfig.wsUrl=ws://kcm.example.com   --set postgres.enabled=true --set redis.enabled=true
 ```
 
-The chart has no default password: the `admin` password is generated at install, `helm install` prints the command to read it. Every value is documented by `helm show values oci://registry-1.docker.io/kafkaetech/kcm --version 1.2.0`; the environment variables below go under `api.env` (the passwords under `api.secret`).
+The chart has no default password: the `admin` password is generated at install, `helm install` prints the command to read it. Every value is documented by `helm show values oci://registry-1.docker.io/kafkaetech/kcm --version 1.2.1`; the environment variables below go under `api.env` (the passwords under `api.secret`).
 
 ---
 
