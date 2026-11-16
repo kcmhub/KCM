@@ -62,10 +62,10 @@ kubectl create namespace kcm
 kubectl -n kcm create secret generic kcm-api-keys --from-file=keys
 
 # KCM with the embedded PostgreSQL and Redis
-helm upgrade --install kcm oci://registry-1.docker.io/kafkaetech/kcm --version 1.4.0 -n kcm   --set ingress.host=kcm.example.com   --set ui.runtimeConfig.apiUrl=http://kcm.example.com   --set ui.runtimeConfig.wsUrl=ws://kcm.example.com   --set postgres.enabled=true --set redis.enabled=true
+helm upgrade --install kcm oci://registry-1.docker.io/kafkaetech/kcm --version 1.4.1 -n kcm   --set ingress.host=kcm.example.com   --set ui.runtimeConfig.apiUrl=http://kcm.example.com   --set ui.runtimeConfig.wsUrl=ws://kcm.example.com   --set postgres.enabled=true --set redis.enabled=true
 ```
 
-The chart has no default password: the `admin` password is generated at install, `helm install` prints the command to read it. Every value is documented by `helm show values oci://registry-1.docker.io/kafkaetech/kcm --version 1.4.0`; the environment variables below go under `api.env` (the passwords under `api.secret`).
+The chart has no default password: the `admin` password is generated at install, `helm install` prints the command to read it. Every value is documented by `helm show values oci://registry-1.docker.io/kafkaetech/kcm --version 1.4.1`; the environment variables below go under `api.env` (the passwords under `api.secret`).
 
 ---
 
@@ -187,6 +187,16 @@ Analysis of a consumer group with a local model served by [Ollama](https://ollam
 | `KCM_ASSISTANT_OLLAMA_URL`      | `http://localhost:11434` | Ollama URL, reachable from the kcm-api container.             |
 | `KCM_ASSISTANT_MODEL`           | `gemma3:4b`              | Model used for the analysis (must be pulled in Ollama).       |
 | `KCM_ASSISTANT_TIMEOUT_SECONDS` | `120`                    | Maximum duration of one call to the model, in seconds.        |
+
+### 🔸 Audit event stream for SIEMs (since 1.4.1, Enterprise edition)
+
+Every audit event can also be written on the standard output of kcm-api as one JSON line (logger `kcm.audit`, the JSON alone on the line), for a log collector feeding a SIEM. The lines never hold a secret nor the content of a message. Without an Enterprise license the stream stays off and a WARN says why at startup.
+
+| Variable                | Default | Description                                         |
+| ----------------------- | ------- | --------------------------------------------------- |
+| `KCM_AUDIT_LOG_ENABLED` | `false` | Writes every audit event as one JSON line on stdout. |
+
+Fields of a line: `schemaVersion`, `id`, `timestamp`, `action`, `status`, `actor` (`user`, `type`), `resourceType`, `resourceId`, `clusterId`, `kcmGroupId`, `durationMs`, `ip`, `userAgent`, `traceId`, `meta`, `errorMessage`. Fields may be added in later versions, never renamed or removed.
 
 ---
 
