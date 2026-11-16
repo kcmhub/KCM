@@ -97,6 +97,15 @@ services:
       KCM_COOKIE_DOMAIN: ""
       KCM_COOKIE_MAX_AGE_SECONDS: "86400"
 
+      # Sessions and service accounts (since 1.4.0)
+      KCM_COOKIE_SAME_SITE: "Lax"
+      KCM_SESSION_CHECK_CACHE_SECONDS: "30"
+      KCM_LOGIN_MAX_FAILURES: "5"
+      KCM_LOGIN_LOCK_MINUTES: "15"
+      KCM_SA_TOKEN_DEFAULT_VALIDITY_DAYS: "90"
+      KCM_SA_TOKEN_MAX_VALIDITY_DAYS: "365"
+      KCM_SA_LEGACY_JWT_ACCEPTED: "true"
+
       # JWT persistence
       KCM_JWT_PERSISTENCE_MODE: "JDBC"
 

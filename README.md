@@ -81,10 +81,14 @@ KCM can be fully configured via environment variables. The values below are the 
 | `KCM_COOKIE_NAME`            | `KCM_AT`                | Name of the authentication cookie that stores the access token.                                                                                                                                                   |
 | `KCM_COOKIE_DOMAIN`          | ``                      | Cookie domain. Example: `.kcmhub.io` when UI and API run on subdomains.                                                                                                                                           |
 | `KCM_COOKIE_MAX_AGE_SECONDS` | `86400`                 | Lifetime of the authentication cookie in seconds.                                                                                                                                                                 |
+| `KCM_COOKIE_SAME_SITE`       | `Lax`                   | Since 1.4.0. SameSite of the authentication cookie. `None` only when the UI runs on another site than the API, over HTTPS.                                                                                       |
+| `KCM_SESSION_CHECK_CACHE_SECONDS` | `30`               | Since 1.4.0. Seconds each API instance caches the session state of a user (account enabled, session version): a revoked session is refused everywhere within this delay.                                       |
+| `KCM_LOGIN_MAX_FAILURES`     | `5`                     | Since 1.4.0. Failed password sign ins of one username from one address before a lock (4 times more from any address lock the username).                                                                        |
+| `KCM_LOGIN_LOCK_MINUTES`     | `15`                    | Since 1.4.0. Duration of that lock, in minutes.                                                                                                                                                                  |
 | `KCM_REDIRECT_ALLOWLIST`     | `http://localhost:4200` | Comma-separated list of allowed **redirect origins** after login (format: `scheme://host[:port]`, no trailing slash). Paths are ignored during validation. Example: `https://app.kcmhub.io,http://localhost:4200` |
 | `KCM_DEFAULT_REDIRECT`       | `http://localhost:4200` | Default post-login/logout redirect URL (should be one of the allowed origins or a safe same-origin path).                                                                                                         |
 | `KCM_DEFAULT_USER_ENABLED`   | `true`                  | Whether to enable the built-in default admin user (intended for first setup or demos only).                                                                                                                       |
-| `KCM_DEFAULT_PASSWORD`       | `admin`                 | Password of the default admin user when it is enabled.                                                                                                                                                            |
+| `KCM_DEFAULT_PASSWORD`       | `admin` (application: empty) | Password of the default admin user when it is enabled. Since 1.4.0, when empty a random password is generated and printed once in the API log.                                                              |
 
 ### 🔸 License management
 
@@ -104,6 +108,17 @@ KCM can be fully configured via environment variables. The values below are the 
 | `KCM_ENCRYPT_PRIVATE_KEY`          | `/app/keys/encryption/private.pem` | Private key (PKCS#8 PEM) decrypting the secrets stored in the database. Distinct from the JWT pair since 1.2.1.                                                                       |
 | `KCM_ENCRYPT_PUBLIC_KEY`           | `/app/keys/encryption/public.pem`  | Public key (X.509 PEM) encrypting the secrets stored in the database.                                                                                                                |
 | `KCM_ENCRYPT_PREVIOUS_PRIVATE_KEY` | `/app/keys/private.pem` (application: empty) | Since 1.2.1. Private key of the previous encryption pair: the secrets it encrypted are still read and re-encrypted with the current pair at startup. Ignored when the file does not exist. |
+
+### 🔸 Service account tokens (since 1.4.0)
+
+Service accounts sign in with opaque tokens (`Authorization: Bearer kcm_sa_...`), created and revoked in
+*Settings > Users > Service Accounts > Tokens* (or `POST /api/v1/users/service-accounts/{name}/tokens`).
+
+| Variable                             | Default | Description                                                                                                     |
+| ------------------------------------ | ------- | --------------------------------------------------------------------------------------------------------------- |
+| `KCM_SA_TOKEN_DEFAULT_VALIDITY_DAYS` | `90`    | Validity of a new token when none is given.                                                                     |
+| `KCM_SA_TOKEN_MAX_VALIDITY_DAYS`     | `365`   | Maximum validity of a token.                                                                                    |
+| `KCM_SA_LEGACY_JWT_ACCEPTED`         | `true`  | Service account JWTs issued before 1.4.0 stay valid until they expire. Set `false` to refuse them at once.      |
 
 ### 🔸 JWT configuration
 
