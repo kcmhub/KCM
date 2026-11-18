@@ -217,6 +217,14 @@ Every audit event can also be written on the standard output of kcm-api as one J
 
 Fields of a line: `schemaVersion`, `id`, `timestamp`, `action`, `status`, `actor` (`user`, `type`), `resourceType`, `resourceId`, `clusterId`, `kcmGroupId`, `durationMs`, `ip`, `userAgent`, `traceId`, `meta`, `errorMessage`. Fields may be added in later versions, never renamed or removed.
 
+### 🔸 KCM as code secrets (since 1.6.0, Team and Enterprise editions)
+
+KCM groups, Kafka clusters and their connections declared as code never hold a secret: they reference a file of a directory that kcm-api reads (`passwordFrom: { file: payments-sasl-password }`). Mount the directory read only and set the variable; a secret not referenced keeps the value entered in the UI.
+
+| Variable              | Default | Description                                                        |
+| --------------------- | ------- | ------------------------------------------------------------------ |
+| `KCM_IAC_SECRETS_DIR` | (none)  | Directory of the secret files referenced by the KCM as code declarations. |
+
 ---
 
 ## 📦 Docker Images
