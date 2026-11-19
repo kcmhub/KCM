@@ -23,6 +23,9 @@ At the first start the API generates its two key pairs in `00_kcm_with_docker_co
 sessions, `encryption/` protects the secrets stored in the database). Back up this directory with the database, and
 never share it. Set `KCM_DEFAULT_PASSWORD` before the first start, or change the `admin` password right away.
 
+The compose file pins a KCM version (`kafkaetech/kcm-api` and `kafkaetech/kcm-ui`, always the same version). To upgrade,
+back up the database and `data/keys`, set the new version on both images, then run `docker compose pull && docker compose up -d`.
+
 ### ⚠️ Upgrade from 1.2.0 or earlier: regenerate the keys and change your secrets
 
 Up to 1.2.0 this repository shipped a key pair in `data/keys` (`private.pem` / `public.pem`), used both to sign
