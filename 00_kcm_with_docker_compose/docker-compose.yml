@@ -139,6 +139,10 @@ services:
       - ./data/files:/app/files
       - kcm-license:/app/license
       - kcm-evaluation:/tmp/evaluation
+    networks:
+      - default
+      # Shared with the example Kafka clusters of this repository (docker network create kcm-net)
+      - kcm-net
 
   kcm-ui:
     image: kafkaetech/kcm-ui:latest
@@ -159,3 +163,7 @@ volumes:
   redisdata:
   kcm-evaluation:
   kcm-license:
+
+networks:
+  kcm-net:
+    external: true
