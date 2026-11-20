@@ -1,0 +1,11 @@
+*.sh text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.properties text eol=lf
+*.conf text eol=lf
+*.cnf text eol=lf
+*.md text
+*.png binary
+*.jks binary
+*.p12 binary
+*.keytab binary

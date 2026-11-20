@@ -11,7 +11,7 @@ KCM helps teams gain insights, visibility, and control over Kafka environments.
 ```bash
 git clone https://github.com/kcmhub/KCM.git
 cd KCM/00_kcm_with_docker_compose
-docker network create kcm-net
+docker network create kcm-net 2>/dev/null || true
 docker compose up -d
 ```
 
@@ -51,6 +51,21 @@ a session accepted by an install that used it. From 1.2.1 the API refuses to sta
 If your `docker-compose.yml` is a modified copy, apply the changes of the environment section below
 (`KCM_KEYS_GENERATE_IF_MISSING`, `KCM_JWT_*`, `KCM_ENCRYPT_*`, `KCM_ENCRYPT_PREVIOUS_PRIVATE_KEY`) and mount
 `./data/keys` writable (no `:ro`).
+
+---
+
+## 🧪 Examples
+
+Ready-to-run examples to try KCM against real clusters:
+
+| Folder | What it is |
+| ------ | ---------- |
+| [`00_kcm_with_docker_compose`](./00_kcm_with_docker_compose) | KCM with Docker Compose (the quick start above) |
+| [`01_kafka_broker`](./01_kafka_broker) | Plain Kafka 4.4 KRaft cluster, 3 controllers + 3 brokers, no security |
+| [`02_security_kafka_with_kerberos`](./02_security_kafka_with_kerberos) | Kafka with SASL GSSAPI / Kerberos, self-contained KDC |
+| [`03_kafka_kraft_sasl_ssl`](./03_kafka_kraft_sasl_ssl) | Kafka 4.4 KRaft with SASL_SSL, SCRAM-SHA-512 and ACLs, with a [YouTube tutorial](https://www.youtube.com/watch?v=Yg8TvNINrqo) |
+
+> Run **one Kafka example at a time**: they share container names and the `kcm-net` network (`docker compose down -v` before starting another).
 
 ---
 
@@ -246,4 +261,4 @@ You can open issues or feedback directly on our GitHub repo. We also welcome fea
 
 ---
 
-**© 2024-2025 ELITE-TECH. All rights reserved.**
+**© 2024-2026 ELITE-TECH. All rights reserved.**

@@ -1,12 +1,3 @@
 /.idea/
-/02_security_kafka_with sasl/certificates/broker-*/broker-*.crt
-/02_security_kafka_with sasl/certificates/broker-*/broker-*.csr
-/02_security_kafka_with sasl/certificates/broker-*/broker-*.key
-/02_security_kafka_with sasl/certificates/broker-*/broker-*.p12
-/02_security_kafka_with sasl/certificates/broker-*/kafka.keystore.jks
-/02_security_kafka_with sasl/certificates/broker-*/kafka.truststore.jks
 /00_kcm_with_docker_compose/data/files/KAFKA_CLUSTER/
-/02_security_kafka_with sasl/certificates/ca/ca.key
-/02_security_kafka_with sasl/certificates/ca/ca.pem
-/02_security_kafka_with sasl/certificates/ca/ca.srl
 /03_kafka_kraft_sasl_ssl/certs/
