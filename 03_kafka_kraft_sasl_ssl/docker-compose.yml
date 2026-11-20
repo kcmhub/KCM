@@ -1,0 +1,72 @@
+# Kafka 4.4.0 KRaft, 1 controller + 3 brokers, SASL_SSL everywhere
+name: kcm-tuto
+
+x-kafka: &kafka
+  image: apache/kafka:4.4.0
+  # Our own server.properties, no auto-config wrapper
+  entrypoint: ["/opt/kafka/bin/kafka-server-start.sh", "/etc/kafka/tuto/server.properties"]
+  restart: unless-stopped
+  networks: [kcm-net]
+
+services:
+  controller-1:
+    <<: *kafka
+    hostname: controller-1
+    container_name: kcm-tuto-controller-1
+    volumes:
+      - ./config/controller-1.properties:/etc/kafka/tuto/server.properties:ro
+      - ./certs:/etc/kafka/tuto/certs:ro
+      - controller-1-data:/var/lib/kafka/data
+
+  broker-1:
+    <<: *kafka
+    hostname: broker-1
+    container_name: kcm-tuto-broker-1
+    volumes:
+      - ./config/broker-1.properties:/etc/kafka/tuto/server.properties:ro
+      - ./certs:/etc/kafka/tuto/certs:ro
+      - broker-1-data:/var/lib/kafka/data
+
+  broker-2:
+    <<: *kafka
+    hostname: broker-2
+    container_name: kcm-tuto-broker-2
+    volumes:
+      - ./config/broker-2.properties:/etc/kafka/tuto/server.properties:ro
+      - ./certs:/etc/kafka/tuto/certs:ro
+      - broker-2-data:/var/lib/kafka/data
+
+  broker-3:
+    <<: *kafka
+    hostname: broker-3
+    container_name: kcm-tuto-broker-3
+    volumes:
+      - ./config/broker-3.properties:/etc/kafka/tuto/server.properties:ro
+      - ./certs:/etc/kafka/tuto/certs:ro
+      - broker-3-data:/var/lib/kafka/data
+
+  # Shell with the Kafka CLI tools: docker compose run --rm cli
+  cli:
+    image: apache/kafka:4.4.0
+    profiles: [cli]
+    entrypoint: bash
+    working_dir: /tuto
+    environment:
+      PATH: /opt/kafka/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      PS1: "cli $$ "
+    volumes:
+      - ./config:/tuto/config:ro
+      - ./certs:/tuto/certs:ro
+    networks: [kcm-net]
+    stdin_open: true
+    tty: true
+
+networks:
+  kcm-net:
+    external: true
+
+volumes:
+  controller-1-data:
+  broker-1-data:
+  broker-2-data:
+  broker-3-data:

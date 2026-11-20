@@ -9,3 +9,4 @@
 /02_security_kafka_with sasl/certificates/ca/ca.key
 /02_security_kafka_with sasl/certificates/ca/ca.pem
 /02_security_kafka_with sasl/certificates/ca/ca.srl
+/03_kafka_kraft_sasl_ssl/certs/
