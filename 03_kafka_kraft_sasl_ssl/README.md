@@ -1,5 +1,7 @@
 # Kafka 4.4.0 KRaft with SASL_SSL
 
+[![Secure Kafka KRaft cluster with SASL_SSL and SCRAM-SHA-512, step by step, then KCM](https://github.com/user-attachments/assets/ee751fce-5d8a-4b88-ab06-bfa847ac3f89)](https://www.youtube.com/watch?v=Yg8TvNINrqo)
+
 A local cluster with 1 controller and 3 brokers (racks a, b, c):
 
 - TLS with our own CA, one certificate per node
