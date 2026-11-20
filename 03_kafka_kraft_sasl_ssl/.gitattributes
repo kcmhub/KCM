@@ -1,0 +1,3 @@
+*.sh text eol=lf
+*.properties text eol=lf
+*.yml text eol=lf
