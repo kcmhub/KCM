@@ -1,290 +1,147 @@
-# README — Install Kerberos (MIT) on Ubuntu 24.04 and generate keytabs for Kafka/KCM
+# Kafka 4.4.0 with Kerberos (SASL/GSSAPI)
 
-This guide describes the steps to set up a MIT Kerberos KDC on Ubuntu 24.04, create the required principals, and export keytabs for a Kafka broker and for KCM. The example uses the internal domain kcm.lan and the REALM KCM.LAN with a broker broker1.kcm.lan and a KDC kdc.kcm.lan.
+A single Kafka broker (KRaft) that authenticates clients with Kerberos, plus a demo KDC, all started by
+`docker compose up -d`:
 
-Note: All commands are intended to be run on the Ubuntu KDC machine. Commands requiring elevated privileges use `sudo` and may prompt you for your local sudo password.
+- `kdc`: a MIT Kerberos KDC for the realm `KCM.LAN`, built from `kdc/`. At first start it creates the principals
+  `kafka/broker1.kcm.lan`, `kcm-svc` and `client` and writes their keytabs in `keytabs/`
+- `kafka`: `apache/kafka:4.4.0`, listener `SASL_PLAINTEXT` with GSSAPI on port 9093
+- `cli`: a shell with the Kafka tools, already configured to authenticate as `client@KCM.LAN`
 
----
+Everything is demo only: fixed KDC master password, keytabs readable by everyone, no TLS (`SASL_PLAINTEXT`).
+In production use `SASL_SSL` with GSSAPI, a real KDC (or Active Directory) and keytabs with strict permissions.
 
-## 0) Prerequisites (names and resolution)
+To understand the concepts (principal, TGT, service ticket, keytab), read [KERBEROS.md](KERBEROS.md).
+To use your own KDC on an Ubuntu VM instead of the container, see [KDC_ON_UBUNTU.md](KDC_ON_UBUNTU.md).
 
-- Linux machine/VM to install the KDC (Ubuntu 24.04 recommended). Run all commands below on this machine.
-- REALM: `KCM.LAN` (uppercase)
-- Domain: `kcm.lan`
-- KDC: `kdc.kcm.lan`
-- Broker: `broker1.kcm.lan`
+Requirements: Docker with the compose plugin.
 
-Add entries to `/etc/hosts` on the Ubuntu machine (replace `<IP_VM_UBUNTU>`):
-
-```bash
-sudo sh -c 'cat >> /etc/hosts <<EOF
-<IP_VM_UBUNTU>  kdc.kcm.lan kdc
-<IP_VM_UBUNTU>  broker1.kcm.lan broker1
-EOF'
-```
-
-Sync the clock (Kerberos is time-sensitive):
+## 1. Network
 
 ```bash
-sudo apt update
-sudo apt install -y chrony
-sudo systemctl enable --now chrony
+docker network inspect kcm-net >/dev/null 2>&1 || docker network create kcm-net
 ```
 
-Interactive prompts:
-- Sudo password may be requested.
+`kcm-net` is shared with KCM (same name as in the [KCM quick start](../00_kcm_with_docker_compose)), so KCM
+reaches the KDC and the broker by name. Nothing happens if it already exists.
 
----
-
-## 1) Install the MIT Kerberos KDC
+## 2. Start
 
 ```bash
-sudo apt update
-sudo apt install -y krb5-kdc krb5-admin-server krb5-user
+docker compose up -d --build
+docker compose ps
 ```
 
-Interactive prompts (Debconf):
-- Default Kerberos 5 realm: `KCM.LAN`
-- Kerberos servers for your realm: `kdc.kcm.lan`
-- Administrative server for your realm: `kdc.kcm.lan`
+The broker waits for the KDC to be healthy (the healthcheck gets a ticket with `client.keytab`).
+The first start builds the KDC image, which takes a minute.
 
----
-
-## 2) Configure `/etc/krb5.conf`
-
-Edit the file to point to your KDC:
-
-```ini
-[libdefaults]
-  default_realm = KCM.LAN
-  dns_canonicalize_hostname = false
-  rdns = false
-  ticket_lifetime = 24h
-  renew_lifetime = 7d
-  forwardable = true
-
-[realms]
-  KCM.LAN = {
-    kdc = kdc.kcm.lan
-    admin_server = kdc.kcm.lan
-  }
-
-[domain_realm]
-  .kcm.lan = KCM.LAN
-  kcm.lan = KCM.LAN
-```
-
-No prompt; just save the file.
-
----
-
-## 3) Initialize the Kerberos database
+## 3. Check the KDC and the broker
 
 ```bash
-sudo krb5_newrealm
+docker compose logs kdc
+docker compose logs kafka | grep -E "Kafka Server started|ERROR"
+ls -l keytabs
 ```
 
-Interactive prompts:
-- Set the KDC database master password twice (strong password). This is NOT the `admin/admin` password.
+You should see the three principals in the KDC logs, `krb5kdc: starting...`, and `Kafka Server started` for the
+broker. `keytabs/` contains `kafka-broker1.keytab`, `kcm-svc.keytab` and `client.keytab`.
 
----
-
-## 4) Allow the Kerberos admin
-
-Authorize the admin principal in `/etc/krb5kdc/kadm5.acl` and restart services:
+## 4. Test with the CLI
 
 ```bash
-sudo sh -c 'echo "admin/admin@KCM.LAN *" > /etc/krb5kdc/kadm5.acl'
-sudo systemctl restart krb5-kdc krb5-admin-server
+docker compose run --rm cli
 ```
 
-Interactive prompts:
-- Sudo password may be requested.
-
----
-
-## 5) Create the admin and test authentication
-
-Create the admin principal and get a TGT:
+You get a shell (`cli $`) with `client.properties` in the current directory:
 
 ```bash
-sudo kadmin.local -q "addprinc admin/admin"
-kinit admin/admin
-klist
+kafka-topics.sh --bootstrap-server broker1.kcm.lan:9093 --command-config client.properties \
+  --create --topic demo --partitions 1
+
+echo "hello kerberos" | kafka-console-producer.sh --bootstrap-server broker1.kcm.lan:9093 \
+  --command-config client.properties --topic demo
+
+kafka-console-consumer.sh --bootstrap-server broker1.kcm.lan:9093 --command-config client.properties \
+  --topic demo --group demo-group --from-beginning --max-messages 1
+
+kafka-consumer-groups.sh --bootstrap-server broker1.kcm.lan:9093 --command-config client.properties \
+  --describe --group demo-group
 ```
 
-Interactive prompts:
-- You will set then use the `admin/admin@KCM.LAN` password.
+Type `exit` to leave. The `TGT renewal thread has been interrupted` warnings at the end of each command are
+harmless.
 
----
+What `client.properties` does: `security.protocol=SASL_PLAINTEXT`, `sasl.mechanism=GSSAPI`,
+`sasl.kerberos.service.name=kafka` (the first part of the broker principal `kafka/broker1.kcm.lan`) and a
+`Krb5LoginModule` that logs in as `client@KCM.LAN` with `client.keytab`.
 
-## 6) Prepare the keytabs location (on the KDC)
+## Layout
+
+| Item                | Value                                                        |
+|---------------------|--------------------------------------------------------------|
+| Realm               | `KCM.LAN`                                                    |
+| KDC                 | `kdc.kcm.lan` (container `kcm-krb-kdc`)                      |
+| Broker              | `broker1.kcm.lan` (container `kcm-krb-broker1`)              |
+| Listeners           | INTERNAL 9092 (PLAINTEXT), SASL_PLAINTEXT 9093 (GSSAPI), CONTROLLER 9094 |
+| Principals          | `kafka/broker1.kcm.lan@KCM.LAN`, `kcm-svc@KCM.LAN`, `client@KCM.LAN` |
+| Keytabs             | `keytabs/kafka-broker1.keytab`, `keytabs/kcm-svc.keytab`, `keytabs/client.keytab` |
+
+No port is published on the host: the names `kdc.kcm.lan` and `broker1.kcm.lan` only exist for containers on
+`kcm-net` (network aliases), and Kerberos needs those names, not IP addresses.
+
+## Connect KCM
+
+Start KCM with the quick start in [`00_kcm_with_docker_compose`](../00_kcm_with_docker_compose): it joins
+`kcm-net`, so it resolves `kdc.kcm.lan` and `broker1.kcm.lan`.
+
+1. KCM needs the Kerberos configuration (`krb5.conf`, which tells where the KDC of `KCM.LAN` is). Mount it in the
+   KCM API container at `/etc/krb5.conf`: in `00_kcm_with_docker_compose`, add a `docker-compose.override.yml`
+
+   ```yaml
+   services:
+     kcm-api:
+       volumes:
+         - ../02_security_kafka_with_kerberos/krb5.conf:/etc/krb5.conf:ro
+   ```
+
+   then run `docker compose up -d` again. KCM also has a Settings > Kerberos tab to upload `krb5.conf`; with
+   KCM 1.5.1 that upload fails (HTTP 500), so use the mount for now.
+2. Create an environment if needed, then add a cluster:
+   - Bootstrap servers: `broker1.kcm.lan:9093`
+   - Security protocol: `SASL_PLAINTEXT`, SASL mechanism: `GSSAPI`
+   - Principal: `kcm-svc@KCM.LAN`
+   - Service name: `kafka`
+   - Use KeyTab checked, Kerberos Keytab: upload `keytabs/kcm-svc.keytab`. KCM stores it on its server and fills
+     "Kerberos Keytab Location" with the path (for example `/app/files/KAFKA_CLUSTER/<id>/keytab.keytab`). If the
+     keytab is already on the KCM server, leave the upload empty and type that path in the location field.
+3. Create, then Test connection: `Connection OK` (tested with KCM 1.5.1 and Kafka 4.4.0). Without `krb5.conf`
+   the test fails with `Unable to locate KDC for realm KCM.LAN`.
+
+The bootstrap must be the FQDN. With an IP address the client asks for the service `kafka/<ip>`, which does
+not exist in the KDC.
+
+## Troubleshooting
+
+- `Cannot locate KDC` or `Unable to locate KDC for realm KCM.LAN`: the client does not know `krb5.conf` (for KCM,
+  see the Kerberos settings), or it cannot resolve `kdc.kcm.lan` (it must be on `kcm-net`).
+- `Server not found in Kerberos database`: the client used another name than `broker1.kcm.lan` (an IP, a
+  different alias). The service principal is built from the host name of the bootstrap server.
+- `Clock skew too great`: the clocks of the client and the KDC differ by more than 5 minutes. On Docker Desktop,
+  restart the engine if the VM clock drifted after a sleep.
+- `Preauthentication failed` or `Checksum failed`: the keytab does not match the KDC database, for example
+  after deleting the `kdc-data` volume but keeping old keytabs. Do a full reset (below).
+- Keytab not readable: the Kafka image runs as uid 1000. The KDC container sets the keytabs to `1000:1000` with
+  mode 644 (demo only). With keytabs from another source, make them readable by uid 1000.
+- Realm in lowercase: realms are case sensitive. Write `KCM.LAN` in principals and `krb5.conf`, and the domain
+  mapping in lowercase (`.kcm.lan`).
+- More details: add `-Dsun.security.krb5.debug=true` to `KAFKA_OPTS` and run `docker compose up -d`.
+
+## Reset
 
 ```bash
-sudo mkdir -p /etc/security/keytabs
-sudo chown -R $(whoami):$(whoami) /etc/security/keytabs
-sudo chmod 750 /etc/security/keytabs
+docker compose down -v --rmi local
+rm -f keytabs/*.keytab
 ```
 
-Interactive prompts:
-- Sudo password may be requested.
-
----
-
-## 7) Create the Kafka broker principal and export the keytab (on the KDC)
-
-```bash
-kadmin -p admin/admin -q "addprinc -randkey kafka/broker1.kcm.lan@KCM.LAN"
-sudo kadmin -p admin/admin -q "ktadd -k /etc/security/keytabs/kafka-broker1.keytab kafka/broker1.kcm.lan@KCM.LAN"
-sudo chmod 600 /etc/security/keytabs/kafka-broker1.keytab
-```
-
-Interactive prompts:
-- Provide `admin/admin@KCM.LAN` password when asked.
-
----
-
-## 8) Create the KCM principal and export the keytab (on the KDC)
-
-```bash
-kadmin -p admin/admin -q "addprinc -randkey kcm-svc@KCM.LAN"
-sudo kadmin -p admin/admin -q "ktadd -k /etc/security/keytabs/kcm.keytab kcm-svc@KCM.LAN"
-sudo chmod 600 /etc/security/keytabs/kcm.keytab
-```
-
-Interactive prompts:
-- Provide `admin/admin@KCM.LAN` password when asked.
-
----
-
-## 9) Verification (on the KDC)
-
-```bash
-sudo klist -k -t -e /etc/security/keytabs/kafka-broker1.keytab
-sudo klist -k -t -e /etc/security/keytabs/kcm.keytab
-kinit -k -t /etc/security/keytabs/kcm.keytab kcm-svc@KCM.LAN
-klist
-kvno kafka/broker1.kcm.lan@KCM.LAN
-```
-
----
-
-## 10) Summary of paths and identities
-
-- REALM: `KCM.LAN`
-- KDC: `kdc.kcm.lan`
-- Broker: `broker1.kcm.lan`
-- Broker keytab: `/etc/security/keytabs/kafka-broker1.keytab`
-- KCM keytab: `/etc/security/keytabs/kcm.keytab`
-- Admin: `admin/admin@KCM.LAN`
-- Broker principal: `kafka/broker1.kcm.lan@KCM.LAN`
-- KCM principal: `kcm-svc@KCM.LAN`
-
----
-
-## 11) Run with Docker Compose (GSSAPI listener)
-
-Before starting the container:
-
-1) Copy the broker keytab into this project folder
-
-- On the KDC (Linux host), the broker keytab is at `/etc/security/keytabs/kafka-broker1.keytab`.
-- Copy it into this folder at `./keytabs/kafka-broker1.keytab`.
-
-Examples:
-- Windows (cmd.exe):
-  ```cmd
-  scp youruser@kdc.kcm.lan:/etc/security/keytabs/kafka-broker1.keytab "[PATH_TO_YOUR_LOCAL_WORKSPACE]\k_c_m\02_security_kafka_with_kerberos\keytabs\kafka-broker1.keytab"
-  ```
-- Linux/macOS:
-  ```bash
-  scp youruser@kdc.kcm.lan:/etc/security/keytabs/kafka-broker1.keytab [PATH_TO_YOUR_LOCAL_WORKSPACE]/k_c_m/02_security_kafka_with_kerberos/keytabs/keytabs/kafka-broker1.keytab
-  ```
-
-2) Ensure configuration files are present and consistent
-
-- `./krb5.conf` defines realm `KCM.LAN` and points to `kdc.kcm.lan` (bind-mounted to `/etc/krb5.conf`).
-- `./keytabs/kafka-broker1.keytab` contains `kafka/broker1.kcm.lan@KCM.LAN` (bind-mounted to `/etc/security/keytabs/kafka-broker1.keytab`).
-- `./kafka_server_jaas.conf` references that keytab and principal.
-- In `docker-compose.yml`, `extra_hosts` uses your actual KDC/broker IPs for `kdc.kcm.lan` and `broker1.kcm.lan`.
-
-Start the broker and check logs:
-
-```cmd
-docker compose up -d
-docker compose logs -f kafka
-```
-
-If you see SASL/GSSAPI errors, re-check `./krb5.conf`, JAAS principal, and that the keytab contains the correct entry.
-
-### If you see: `javax.security.auth.login.LoginException: Cannot locate KDC`
-
-- We pass `-Djava.security.krb5.conf=/etc/krb5.conf`. Ensure `./krb5.conf` has:
-  - `[realms] KCM.LAN = { kdc = kdc.kcm.lan }` and `[domain_realm]` for `kcm.lan`.
-- Ensure `extra_hosts` points to the real KDC IP; open UDP/88 and TCP/88 on the KDC firewall.
-- Time skew < 5 minutes (compare container vs KDC time).
-- Optional verbose logs: set `-Dsun.security.krb5.debug=true` in `KAFKA_OPTS` then restart.
-
----
-
-## 12) Troubleshooting — `kdb5_util: Permission denied while initializing Kerberos code`
-
-1) Ensure packages and Kerberos config helper are installed
-
-```bash
-sudo apt update
-sudo apt install -y krb5-kdc krb5-admin-server krb5-user krb5-config
-```
-
-2) Create `/etc/krb5.conf` if missing
-
-```bash
-cat | sudo tee /etc/krb5.conf >/dev/null <<'EOF'
-[libdefaults]
-  default_realm = KCM.LAN
-  dns_canonicalize_hostname = false
-  rdns = false
-  ticket_lifetime = 24h
-  renew_lifetime = 7d
-  forwardable = true
-
-[realms]
-  KCM.LAN = {
-    kdc = kdc.kcm.lan
-    admin_server = kdc.kcm.lan
-  }
-
-[domain_realm]
-  .kcm.lan = KCM.LAN
-  kcm.lan = KCM.LAN
-EOF
-```
-
-3) Fix KDC directories and permissions
-
-```bash
-sudo install -d -m 0755 /etc/krb5kdc
-sudo install -d -m 0700 /var/lib/krb5kdc
-# optional: move stale files aside
-[ -f /etc/krb5kdc/stash ] && sudo mv /etc/krb5kdc/stash /etc/krb5kdc/stash.bak.$(date +%s)
-if [ -f /var/lib/krb5kdc/principal ] || [ -f /var/lib/krb5kdc/principal.ok ]; then
-  TS=$(date +%s); sudo mkdir -p /var/lib/krb5kdc.backup.$TS
-  sudo mv /var/lib/krb5kdc/* /var/lib/krb5kdc.backup.$TS/ 2>/dev/null || true
-fi
-sudo chown -R root:root /etc/krb5kdc /var/lib/krb5kdc
-sudo chmod 755 /etc/krb5kdc
-sudo chmod 700 /var/lib/krb5kdc
-```
-
-4) Initialize the realm again
-
-```bash
-sudo krb5_newrealm
-```
-
-If it still fails, capture a short trace:
-
-```bash
-sudo strace -f -o /tmp/krb5_newrealm.strace krb5_newrealm || true
-grep -nE "EACCES|Permission denied|ENOENT" /tmp/krb5_newrealm.strace | tail -n 40
-```
+Removes the containers, the `kdc-data` and `kafka-data` volumes, the local KDC image and the generated
+keytabs. If the `rm` is refused, the files belong to uid 1000: use `sudo rm`.
