@@ -1,33 +1,37 @@
-Proprietary Evaluation License
+KCM License
 
-Copyright (c) 2024-2025 ELITE-TECH
+Copyright (c) 2024-2026 ELITE-TECH
 
-This software, Kafka Cluster Manager (KCM), is proprietary and confidential. All rights reserved.
+This software, Kafka Cluster Manager (KCM), is proprietary. All rights reserved.
 
-Permission is hereby granted to any individual or organization to use this software **free of charge for non-commercial evaluation purposes only**, subject to the following conditions:
-
-1. **Non-Commercial Use Only**
-   This license grants usage rights solely for testing, evaluation, and demonstration. **Commercial use is strictly prohibited** without a valid license agreement from ELITE-TECH.
+1. **Editions**
+   KCM is distributed in several editions. The **Community** edition may be used free of charge, without time limit,
+   within its limits (2 Kafka clusters, 1 user). The **Starter**, **Team** and **Enterprise** editions are used under a
+   paid subscription or a written agreement with ELITE-TECH, within the limits of the license issued for them. The
+   current editions, limits and prices are published at https://kcmhub.io/pricing.html, and the Terms of Use at
+   https://kcmhub.io/terms.html apply.
 
 2. **No Redistribution**
-   You may not distribute, sublicense, or make the software publicly available in any form.
+   You may not sell, sublicense or redistribute the software, its images or its license files, other than by pointing
+   to the official distribution channels.
 
 3. **No Modification or Reverse Engineering**
-   You may not modify, reverse engineer, decompile, or create derivative works from this software.
+   You may not modify, reverse engineer, decompile, or create derivative works from this software, nor alter or work
+   around its license verification.
 
 4. **Intellectual Property**
-   This software remains the exclusive property of ELITE-TECH. All trademarks, logos, and code are protected under applicable laws.
+   This software remains the exclusive property of ELITE-TECH. All trademarks, logos, and code are protected under
+   applicable laws.
 
 5. **Disclaimer of Warranty**
    This software is provided "as is", without warranty of any kind. Use at your own risk.
 
 6. **License Termination**
-   ELITE-TECH reserves the right to terminate this license at any time if the terms are violated.
+   ELITE-TECH reserves the right to terminate this license if its terms are violated.
 
 ---
 
-To request a commercial license or extended evaluation, please contact:
+To request a paid license, a trial or a quote, please contact:
 
 📧 contact@kcmhub.io
 🌍 https://kcmhub.io
-
