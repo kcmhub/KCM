@@ -231,10 +231,11 @@ Fields of a line: `schemaVersion`, `id`, `timestamp`, `action`, `status`, `actor
 
 ## 🔐 License
 
-This project is **not open source**. It is licensed under a **Proprietary Evaluation License**.
+KCM is **not open source**. It is proprietary software, free to start with:
 
-* 🛠️ Free for **non-commercial evaluation**.
-* 🚫 **Commercial use** requires a paid [license](https://kcmhub.io/pricing.html).
+* 🆓 **Community**: free forever, 2 Kafka clusters, 1 user.
+* 💳 **Starter**, **Team** and **Enterprise** add clusters, users and modules: see the [editions and prices](https://kcmhub.io/pricing.html).
+* 🧪 Every edition can start with a **30-day Enterprise trial**.
 * 📬 Questions? Contact **[contact@kcmhub.io](mailto:contact@kcmhub.io)**.
 * 🎓 **Students** may receive a **free 6-month license** by emailing a valid student ID to the same address.
 
