@@ -26,7 +26,7 @@ services:
       retries: 20
 
   kcm-api:
-    image: kafkaetech/kcm-api:1.5.2  # pinned: change both versions together to upgrade
+    image: kafkaetech/kcm-api:1.6.0  # pinned: change both versions together to upgrade
     restart: unless-stopped
     container_name: kcm-api
     depends_on:
@@ -131,19 +131,24 @@ services:
       # as one JSON line (logger kcm.audit). Stays off with a WARN at startup without an Enterprise license.
       KCM_AUDIT_LOG_ENABLED: "false"
 
+      # KCM as code (since 1.6.0, Team and Enterprise editions): directory of the secret files that the declarations
+      # reference ({ file: name }). Uncomment with the volume ./data/iac-secrets below. Empty: no secret references.
+      # KCM_IAC_SECRETS_DIR: "/app/iac-secrets"
+
     volumes:
       # Writable: the key pairs are generated there at the first start
       - ./data/keys:/app/keys
       - ./data/files:/app/files
       - kcm-license:/app/license
       - kcm-evaluation:/tmp/evaluation
+      # - ./data/iac-secrets:/app/iac-secrets:ro
     networks:
       - default
       # Shared with the example Kafka clusters of this repository (docker network create kcm-net)
       - kcm-net
 
   kcm-ui:
-    image: kafkaetech/kcm-ui:1.5.2
+    image: kafkaetech/kcm-ui:1.6.0
     restart: unless-stopped
     container_name: kcm-ui
     depends_on:

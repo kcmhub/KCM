@@ -82,10 +82,10 @@ kubectl create namespace kcm
 kubectl -n kcm create secret generic kcm-api-keys --from-file=keys
 
 # KCM with the embedded PostgreSQL and Redis
-helm upgrade --install kcm oci://registry-1.docker.io/kafkaetech/kcm --version 1.5.2 -n kcm   --set ingress.host=kcm.example.com   --set ui.runtimeConfig.apiUrl=http://kcm.example.com   --set ui.runtimeConfig.wsUrl=ws://kcm.example.com   --set postgres.enabled=true --set redis.enabled=true
+helm upgrade --install kcm oci://registry-1.docker.io/kafkaetech/kcm --version 1.6.0 -n kcm   --set ingress.host=kcm.example.com   --set ui.runtimeConfig.apiUrl=http://kcm.example.com   --set ui.runtimeConfig.wsUrl=ws://kcm.example.com   --set postgres.enabled=true --set redis.enabled=true
 ```
 
-The chart has no default password: the `admin` password is generated at install, `helm install` prints the command to read it. Every value is documented by `helm show values oci://registry-1.docker.io/kafkaetech/kcm --version 1.5.2`; the environment variables below go under `api.env` (the passwords under `api.secret`).
+The chart has no default password: the `admin` password is generated at install, `helm install` prints the command to read it. Every value is documented by `helm show values oci://registry-1.docker.io/kafkaetech/kcm --version 1.6.0`; the environment variables below go under `api.env` (the passwords under `api.secret`).
 
 ---
 
@@ -216,6 +216,14 @@ Every audit event can also be written on the standard output of kcm-api as one J
 | `KCM_AUDIT_LOG_ENABLED` | `false` | Writes every audit event as one JSON line on stdout. |
 
 Fields of a line: `schemaVersion`, `id`, `timestamp`, `action`, `status`, `actor` (`user`, `type`), `resourceType`, `resourceId`, `clusterId`, `kcmGroupId`, `durationMs`, `ip`, `userAgent`, `traceId`, `meta`, `errorMessage`. Fields may be added in later versions, never renamed or removed.
+
+### 🔸 KCM as code secrets (since 1.6.0, Team and Enterprise editions)
+
+KCM groups, Kafka clusters and their connections declared as code never hold a secret: they reference a file of a directory that kcm-api reads (`passwordFrom: { file: payments-sasl-password }`). Mount the directory read only and set the variable; a secret not referenced keeps the value entered in the UI.
+
+| Variable              | Default | Description                                                        |
+| --------------------- | ------- | ------------------------------------------------------------------ |
+| `KCM_IAC_SECRETS_DIR` | (none)  | Directory of the secret files referenced by the KCM as code declarations. |
 
 ---
 
