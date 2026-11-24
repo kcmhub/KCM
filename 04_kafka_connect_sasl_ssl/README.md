@@ -1,5 +1,7 @@
 # Kafka Connect 4.4.0 on a SASL_SSL cluster
 
+[![Kafka Connect on SASL_SSL: 2 workers, one user per connector, least privilege ACLs, then KCM](https://img.youtube.com/vi/fShtSwjx698/maxresdefault.jpg)](https://www.youtube.com/watch?v=fShtSwjx698)
+
 A Connect cluster of 2 workers (distributed mode) on the SASL_SSL KRaft cluster of
 [`03_kafka_kraft_sasl_ssl`](../03_kafka_kraft_sasl_ssl), with least privilege everywhere:
 

@@ -64,7 +64,7 @@ Ready-to-run examples to try KCM against real clusters:
 | [`01_kafka_broker`](./01_kafka_broker) | Plain Kafka 4.4 KRaft cluster, 3 controllers + 3 brokers, no security |
 | [`02_security_kafka_with_kerberos`](./02_security_kafka_with_kerberos) | Kafka with SASL GSSAPI / Kerberos, self-contained KDC |
 | [`03_kafka_kraft_sasl_ssl`](./03_kafka_kraft_sasl_ssl) | Kafka 4.4 KRaft with SASL_SSL, SCRAM-SHA-512 and ACLs, with a [YouTube tutorial](https://www.youtube.com/watch?v=Yg8TvNINrqo) |
-| [`04_kafka_connect_sasl_ssl`](./04_kafka_connect_sasl_ssl) | Kafka Connect 4.4 cluster (2 workers) on the cluster of 03: one user per connector, least privilege ACLs, REST Basic auth |
+| [`04_kafka_connect_sasl_ssl`](./04_kafka_connect_sasl_ssl) | Kafka Connect 4.4 cluster (2 workers) on the cluster of 03: one user per connector, least privilege ACLs, REST Basic auth, with a [YouTube tutorial](https://www.youtube.com/watch?v=fShtSwjx698) |
 
 > Run **one Kafka example at a time**: they share container names and the `kcm-net` network (`docker compose down -v` before starting another). `04` is the exception: it runs on top of `03`.
 
