@@ -1,0 +1,10 @@
+{
+  "name": "file-source",
+  "config": {
+    "connector.class": "org.apache.kafka.connect.file.FileStreamSourceConnector",
+    "tasks.max": "1",
+    "file": "/data/input.txt",
+    "topic": "demo-lines",
+    "producer.override.sasl.jaas.config": "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"file-source\" password=\"${file:/secrets/file-source.properties:password}\";"
+  }
+}
