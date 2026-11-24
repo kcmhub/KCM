@@ -26,7 +26,7 @@ services:
       retries: 20
 
   kcm-api:
-    image: kafkaetech/kcm-api:1.6.1  # pinned: change both versions together to upgrade
+    image: kafkaetech/kcm-api:1.6.2  # pinned: change both versions together to upgrade
     restart: unless-stopped
     container_name: kcm-api
     depends_on:
@@ -148,7 +148,7 @@ services:
       - kcm-net
 
   kcm-ui:
-    image: kafkaetech/kcm-ui:1.6.1
+    image: kafkaetech/kcm-ui:1.6.2
     restart: unless-stopped
     container_name: kcm-ui
     depends_on:
