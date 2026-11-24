@@ -1,0 +1,11 @@
+{
+  "name": "file-sink",
+  "config": {
+    "connector.class": "org.apache.kafka.connect.file.FileStreamSinkConnector",
+    "tasks.max": "1",
+    "topics": "demo-lines",
+    "file": "/data/output.txt",
+    "consumer.override.sasl.jaas.config": "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"file-sink\" password=\"${file:/secrets/file-sink.properties:password}\";",
+    "admin.override.sasl.jaas.config": "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"file-sink\" password=\"${file:/secrets/file-sink.properties:password}\";"
+  }
+}

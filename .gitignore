@@ -1,3 +1,4 @@
 /.idea/
 /00_kcm_with_docker_compose/data/files/KAFKA_CLUSTER/
 /03_kafka_kraft_sasl_ssl/certs/
+/04_kafka_connect_sasl_ssl/data/

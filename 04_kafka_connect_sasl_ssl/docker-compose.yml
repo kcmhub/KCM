@@ -1,0 +1,54 @@
+# Kafka Connect 4.4.0 distributed mode, 2 workers, on the SASL_SSL cluster of tutorial 03
+name: kcm-tuto-connect
+
+x-connect: &connect
+  image: apache/kafka:4.4.0
+  # Our own worker properties, no auto-config wrapper
+  entrypoint: ["/opt/kafka/bin/connect-distributed.sh"]
+  restart: unless-stopped
+  networks: [kcm-net]
+  environment:
+    # JAAS section used by the REST Basic auth extension
+    KAFKA_OPTS: -Djava.security.auth.login.config=/tuto/config/connect-jaas.conf
+  volumes:
+    - ./config:/tuto/config:ro
+    - ./secrets:/secrets:ro
+    - ../03_kafka_kraft_sasl_ssl/certs:/tuto/certs:ro
+    - ./data:/data
+
+services:
+  connect-1:
+    <<: *connect
+    command: ["/tuto/config/connect-1.properties"]
+    hostname: connect-1
+    container_name: kcm-tuto-connect-1
+    ports:
+      - "127.0.0.1:8083:8083"
+
+  connect-2:
+    <<: *connect
+    command: ["/tuto/config/connect-2.properties"]
+    hostname: connect-2
+    container_name: kcm-tuto-connect-2
+    ports:
+      - "127.0.0.1:8084:8083"
+
+  # Shell with the Kafka CLI tools: docker compose run --rm cli
+  cli:
+    image: apache/kafka:4.4.0
+    profiles: [cli]
+    entrypoint: bash
+    working_dir: /tuto
+    environment:
+      PATH: /opt/kafka/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      PS1: "cli $$ "
+    volumes:
+      - ./config:/tuto/config:ro
+      - ../03_kafka_kraft_sasl_ssl/certs:/tuto/certs:ro
+    networks: [kcm-net]
+    stdin_open: true
+    tty: true
+
+networks:
+  kcm-net:
+    external: true
